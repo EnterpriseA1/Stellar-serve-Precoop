@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SignIn from './pages/SignIn';
+import SignUp from './pages/SignUp';
 
 function App() {
   return (
@@ -7,7 +8,7 @@ function App() {
       <Routes>
         {/* หน้า Login */}
         <Route path="/" element={<SignIn />} />
-
+        <Route path="/signup" element={<SignUp />} />
         {/* หน้า Home ชั่วคราว เอาไว้ทดสอบตอนกดปุ่ม Sign In */}
         <Route
           path="/home"
