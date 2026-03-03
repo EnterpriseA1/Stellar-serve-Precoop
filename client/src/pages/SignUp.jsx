@@ -56,7 +56,7 @@ export default function SignUp() {
                         className="w-full px-5 py-3 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer">
                         <option value="customer">Customer (ลูกค้า)</option>
                         <option value="restaurant">Restaurant (ร้านอาหาร)</option>
-                        <option value="rider">Delivery Personnel (ไรเดอร์)</option>
+
                     </select>
 
                     <button type="submit" className="w-full py-3 font-bold text-[#1a113d] transition duration-200 rounded-full bg-yellow-400 hover:bg-yellow-500">

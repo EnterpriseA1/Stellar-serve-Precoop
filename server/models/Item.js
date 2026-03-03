@@ -9,6 +9,12 @@ const itemSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
+  },
+  category: {
+    type: String,
+    enum: ['burger', 'pizza', 'sushi', 'other'],
+    required: true,
+    default: 'other'
   }
 }, { timestamps: true });
 

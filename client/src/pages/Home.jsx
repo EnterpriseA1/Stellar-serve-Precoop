@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import NavbarRestaurant from '../components/NavbarRestaurant';
 
 export default function Home() {
     const [user, setUser] = useState(null);
@@ -38,7 +40,6 @@ export default function Home() {
                         <div className="p-6">
                             {user.role === 'customer' && <CustomerDashboard />}
                             {user.role === 'restaurant' && <RestaurantDashboard />}
-                            {user.role === 'rider' && <RiderDashboard />}
                         </div>
                     </>
                 )}
@@ -50,37 +51,11 @@ export default function Home() {
                 {currentTab === 'profile' && <ProfilePage user={user} />}
             </div>
 
-            {/* -------------------- Navigation Bar ด้านล่าง -------------------- */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] rounded-t-3xl">
-                <div className="flex justify-around items-center text-[#1a113d]">
-                    {/* ปุ่ม Home */}
-                    <button
-                        onClick={() => setCurrentTab('home')}
-                        className={`flex flex-col items-center gap-1 transition ${currentTab === 'home' ? 'text-yellow-500 font-bold' : 'opacity-60'}`}
-                    >
-                        <span className="text-2xl">🏠</span>
-                        <span className="text-xs">Home</span>
-                    </button>
-
-                    {/* ปุ่ม Search */}
-                    <button
-                        onClick={() => setCurrentTab('search')}
-                        className={`flex flex-col items-center gap-1 transition ${currentTab === 'search' ? 'text-yellow-500 font-bold' : 'opacity-60'}`}
-                    >
-                        <span className="text-2xl">🔍</span>
-                        <span className="text-xs">Search</span>
-                    </button>
-
-                    {/* ปุ่ม Profile */}
-                    <button
-                        onClick={() => setCurrentTab('profile')}
-                        className={`flex flex-col items-center gap-1 transition ${currentTab === 'profile' ? 'text-yellow-500 font-bold' : 'opacity-60'}`}
-                    >
-                        <span className="text-2xl">👤</span>
-                        <span className="text-xs">Profile</span>
-                    </button>
-                </div>
-            </div>
+            {/* Navbar แยกตาม role */}
+            {user.role === 'restaurant'
+                ? <NavbarRestaurant currentTab={currentTab} setCurrentTab={setCurrentTab} />
+                : <Navbar currentTab={currentTab} setCurrentTab={setCurrentTab} />
+            }
 
         </div>
     );
@@ -167,7 +142,7 @@ function CustomerDashboard() {
                 <div className="grid grid-cols-4 gap-3 text-sm font-bold text-center">
                     <div className="p-3 bg-white shadow-sm rounded-xl">🍔 Burger</div>
                     <div className="p-3 bg-white shadow-sm rounded-xl">🍕 Pizza</div>
-                    <div className="p-3 bg-white shadow-sm rounded-xl">🍖 BBQ</div>
+                    <div className="p-3 bg-white shadow-sm rounded-xl">🍽️ อื่นๆ</div>
                     <div className="p-3 bg-white shadow-sm rounded-xl">🍣 Sushi</div>
                 </div>
             </div>
@@ -200,19 +175,8 @@ function RestaurantDashboard() {
                 <p className="mt-2 text-sm">10 Food Orders</p>
             </div>
 
-            <div className="grid grid-cols-4 gap-3 text-xs font-bold text-center text-[#1a113d]">
-                <div className="flex flex-col items-center p-3 bg-white shadow-sm rounded-xl">
-                    <span className="mb-1 text-2xl">📋</span> Orders
-                </div>
-                <div className="flex flex-col items-center p-3 bg-white shadow-sm rounded-xl">
-                    <span className="mb-1 text-2xl">🍔</span> Menu
-                </div>
-                <div className="flex flex-col items-center p-3 bg-white shadow-sm rounded-xl">
-                    <span className="mb-1 text-2xl">💳</span> Payment
-                </div>
-                <div className="flex flex-col items-center p-3 bg-white shadow-sm rounded-xl">
-                    <span className="mb-1 text-2xl">❓</span> Help
-                </div>
+            <div className="flex flex-col items-center p-3 bg-white shadow-sm rounded-xl text-xs font-bold text-center text-[#1a113d] w-full">
+                <span className="mb-1 text-2xl">🍔</span> Menu
             </div>
 
             <div>
@@ -226,37 +190,6 @@ function RestaurantDashboard() {
                             </div>
                             <button className="px-4 py-2 text-sm font-bold bg-yellow-400 rounded-full text-[#1a113d]">
                                 Accept
-                            </button>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-}
-
-function RiderDashboard() {
-    return (
-        <div className="space-y-6">
-            <div className="p-6 text-center bg-white shadow-sm rounded-3xl">
-                <p className="text-sm text-gray-500">Total Distance</p>
-                <h2 className="mt-1 text-4xl font-bold text-[#1a113d]">150 KM</h2>
-                <p className="mt-2 text-sm font-bold text-yellow-500">⭐ 4.8 | Orders: 10</p>
-            </div>
-
-            <div>
-                <h3 className="mb-3 text-lg font-bold">Available Orders (Inbox)</h3>
-                <div className="space-y-3">
-                    {[1, 2].map((item) => (
-                        <div key={item} className="p-4 space-y-2 bg-white shadow-sm rounded-2xl">
-                            <div className="flex items-center justify-between pb-2 border-b">
-                                <h4 className="font-bold">Order #00{item}</h4>
-                                <span className="font-bold text-green-600">ค่าส่ง ฿ 45</span>
-                            </div>
-                            <p className="text-sm text-gray-600">🏪 <b>From:</b> Burger Shop</p>
-                            <p className="text-sm text-gray-600">📍 <b>To:</b> Customer Address</p>
-                            <button className="w-full mt-2 py-2 font-bold text-white transition bg-[#1a113d] rounded-xl hover:bg-[#2d1e5e]">
-                                Accept Delivery
                             </button>
                         </div>
                     ))}
