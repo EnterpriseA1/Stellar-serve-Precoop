@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import SignIn from './pages/SignIn';
 import SignUp from './pages/SignUp';
+import Home from './pages/Home';
 
 function App() {
   return (
@@ -9,15 +10,8 @@ function App() {
         {/* หน้า Login */}
         <Route path="/" element={<SignIn />} />
         <Route path="/signup" element={<SignUp />} />
-        {/* หน้า Home ชั่วคราว เอาไว้ทดสอบตอนกดปุ่ม Sign In */}
-        <Route
-          path="/home"
-          element={
-            <div className="flex items-center justify-center min-h-screen text-2xl font-bold bg-yellow-50 text-[#1a113d]">
-              หน้า Home (กำลังสร้าง...)
-            </div>
-          }
-        />
+        {/*เรียกใช้ Component Home */}
+        <Route path="/home" element={<Home />} />
       </Routes>
     </Router>
   );
