@@ -1,14 +1,15 @@
 const mongoose = require('mongoose');
 
 const itemSchema = new mongoose.Schema({
-  restaurantId: { 
-    type: mongoose.Schema.Types.ObjectId, 
-    ref: 'User', // โยงไปหาคนที่เป็นเจ้าของเมนูนี้ (ร้านอาหาร)
-    required: true 
-  },
   name: { type: String, required: true },
   description: { type: String },
-  price: { type: Number, required: true }
+  price: { type: Number, required: true },
+  // เก็บ ID ของ User (ที่ role เป็น restaurant) เพื่อให้รู้ว่าเมนูนี้เป็นของร้านไหน
+  restaurantId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Item', itemSchema);
