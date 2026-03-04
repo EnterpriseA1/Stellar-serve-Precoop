@@ -54,4 +54,47 @@ router.get('/restaurant/:id', async (req, res) => {
   }
 });
 
+// -----------------------------------------
+// [PUT] /api/items/update/:id (แก้ไขข้อมูลเมนู)
+// -----------------------------------------
+router.put('/update/:id', async (req, res) => {
+  try {
+    const { name, description, price, category } = req.body;
+
+    // ค้นหาและอัปเดตข้อมูลตาม ID
+    const updatedItem = await Item.findByIdAndUpdate(
+      req.params.id,
+      { name, description, price, category },
+      { new: true } // ให้คืนค่าข้อมูลตัวที่อัปเดตแล้วกลับมา
+    );
+
+    if (!updatedItem) {
+      return res.status(404).json({ message: 'ไม่พบเมนูที่ต้องการแก้ไข' });
+    }
+
+    res.json({ message: 'แก้ไขเมนูสำเร็จ!', item: updatedItem });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการแก้ไขเมนู' });
+  }
+});
+
+// -----------------------------------------
+// [DELETE] /api/items/delete/:id (ลบเมนูอาหาร)
+// -----------------------------------------
+router.delete('/delete/:id', async (req, res) => {
+  try {
+    const deletedItem = await Item.findByIdAndDelete(req.params.id);
+
+    if (!deletedItem) {
+      return res.status(404).json({ message: 'ไม่พบเมนูที่ต้องการลบ' });
+    }
+
+    res.json({ message: 'ลบเมนูอาหารสำเร็จ!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'เกิดข้อผิดพลาดในการลบเมนู' });
+  }
+});
+
 module.exports = router;
