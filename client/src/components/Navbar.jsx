@@ -13,14 +13,14 @@ export default function Navbar({ currentTab, setCurrentTab, cartCount = 0 }) {
                     <span className="text-xs">Home</span>
                 </button>
 
-                {/* ปุ่ม Search */}
-                    <button
-                        onClick={() => setCurrentTab('search')}
-                        className={`flex flex-col items-center gap-1 transition ${currentTab === 'search' ? 'text-yellow-500 font-bold' : 'opacity-60'}`}
-                    >
-                        <span className="text-2xl">🔍</span>
-                        <span className="text-xs">Search</span>
-                    </button>
+                {/* ปุ่ม Orders */}
+                <button
+                    onClick={() => setCurrentTab('orders')}
+                    className={`flex flex-col items-center gap-1 transition ${currentTab === 'orders' ? 'text-yellow-500 font-bold' : 'opacity-60'}`}
+                >
+                    <span className="text-2xl">📋</span>
+                    <span className="text-xs">Orders</span>
+                </button>
 
                 {/* ปุ่ม Cart พร้อม Badge */}
                 <button

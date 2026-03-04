@@ -7,11 +7,16 @@ const userSchema = new mongoose.Schema({
   phone: { type: String, required: true },
   role: {
     type: String,
-    enum: ['customer', 'restaurant'], // บังคับว่าต้องเป็น 2 ค่านี้เท่านั้น
+    enum: ['customer', 'restaurant'],
     required: true
   },
-  // สำหรับร้านค้า อาจจะเก็บชื่อร้านไว้ใน name เลย หรือเพิ่มฟิลด์ address ก็ได้ครับ
-  address: { type: String }
-}, { timestamps: true }); // timestamps จะช่วยสร้าง createdAt, updatedAt ให้อัตโนมัติ
+  address: { type: String },
+  isOpen: { type: Boolean, default: true }, // สถานะเปิด/ปิดร้าน (สำหรับ role: restaurant)
+  category: {
+    type: String,
+    enum: ['burger', 'pizza', 'sushi', 'other', null],
+    default: 'other'
+  }
+}, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);

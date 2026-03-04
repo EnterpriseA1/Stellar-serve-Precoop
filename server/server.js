@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const itemRoutes = require('./routes/items');
+const orderRoutes = require('./routes/orders');
 require('dotenv').config();
 
 const app = express();
@@ -19,6 +20,8 @@ mongoose.connect(process.env.MONGO_URI)
 // กำหนด Path หลักให้ API Auth
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
+app.use('/api/orders', orderRoutes);
+
 
 // สร้าง Route พื้นฐานไว้เทสว่า API ทำงานไหม
 app.get('/', (req, res) => {

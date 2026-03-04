@@ -13,6 +13,15 @@ export default function NavbarRestaurant({ currentTab, setCurrentTab }) {
                     <span className="text-xs">Home</span>
                 </button>
 
+                {/* ปุ่ม Menu */}
+                <button
+                    onClick={() => setCurrentTab('menu')}
+                    className={`flex flex-col items-center gap-1 transition ${currentTab === 'menu' ? 'text-yellow-500 font-bold' : 'opacity-60'}`}
+                >
+                    <span className="text-2xl">🍔</span>
+                    <span className="text-xs">Menu</span>
+                </button>
+
                 {/* ปุ่ม Orders */}
                 <button
                     onClick={() => setCurrentTab('orders')}

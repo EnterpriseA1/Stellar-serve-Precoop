@@ -12,7 +12,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'stellarserve_super_secret_key';
 // -----------------------------------------
 router.post('/register', async (req, res) => {
     try {
-        const { username, password, name, phone, role, address } = req.body;
+        const { username, password, name, phone, role, address, category } = req.body;
 
         // เช็คว่ามี Username นี้ในระบบหรือยัง
         const existingUser = await User.findOne({ username });
@@ -31,7 +31,8 @@ router.post('/register', async (req, res) => {
             name,
             phone,
             role,
-            address // ใส่หรือไม่ใส่ก็ได้ (เหมาะกับร้านค้า)
+            address, // ใส่หรือไม่ใส่ก็ได้ (เหมาะกับร้านค้า)
+            category: role === 'restaurant' ? (category || 'other') : undefined
         });
 
         await newUser.save();
@@ -77,7 +78,8 @@ router.post('/login', async (req, res) => {
                 id: user._id,
                 username: user.username,
                 name: user.name,
-                role: user.role
+                role: user.role,
+                isOpen: user.isOpen // ส่งสถานะเปิด/ปิดร้านด้วย
             }
         });
 
@@ -86,5 +88,66 @@ router.post('/login', async (req, res) => {
         res.status(500).json({ message: 'เกิดข้อผิดพลาดทางเซิร์ฟเวอร์' });
     }
 });
+
+// -----------------------------------------
+// [GET] /api/auth/restaurants (ดึงร้านอาหารที่เปิดอยู่เท่านั้น)
+// -----------------------------------------
+router.get('/restaurants', async (req, res) => {
+    try {
+        const restaurants = await User.find(
+            { role: 'restaurant', isOpen: true }, // เฉพาะร้านที่เปิดอยู่
+            { password: 0 } // ไม่ส่งรหัสผ่าน แต่อื่นๆ รวม category ส่งไปหมด
+        );
+        res.json(restaurants);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลร้านอาหาร' });
+    }
+});
+
+// -----------------------------------------
+// [GET] /api/auth/restaurants/:id/status (ดึงสถานะเปิด/ปิดของร้าน)
+// -----------------------------------------
+router.get('/restaurants/:id/status', async (req, res) => {
+    try {
+        const restaurant = await User.findById(req.params.id, { isOpen: 1 });
+        if (!restaurant) return res.status(404).json({ message: 'ไม่พบร้านอาหาร' });
+        res.json({ isOpen: restaurant.isOpen ?? true });
+    } catch (error) {
+        res.status(500).json({ message: 'เกิดข้อผิดพลาด' });
+    }
+});
+
+// -----------------------------------------
+// [PATCH] /api/auth/restaurants/:id/toggle (เปิด/ปิดร้าน)
+// -----------------------------------------
+router.patch('/restaurants/:id/toggle', async (req, res) => {
+    try {
+        // ดึงสถานะปัจจุบันก่อน (isOpen อาจ undefined ใน document เก่า → ถือว่า true)
+        const restaurant = await User.findById(req.params.id);
+        if (!restaurant || restaurant.role !== 'restaurant') {
+            return res.status(404).json({ message: 'ไม่พบร้านอาหารนี้' });
+        }
+
+        const currentIsOpen = restaurant.isOpen ?? true; // ถ้า undefined ให้ถือว่าเปิดอยู่
+        const newIsOpen = !currentIsOpen;
+
+        // อัปเดตด้วย findByIdAndUpdate เพื่อให้ได้ค่าใหม่แน่นอน
+        const updated = await User.findByIdAndUpdate(
+            req.params.id,
+            { isOpen: newIsOpen },
+            { new: true }
+        );
+
+        res.json({
+            message: `ร้านของคุณ${updated.isOpen ? 'เปิด' : 'ปิด'}แล้ว`,
+            isOpen: updated.isOpen
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเปลี่ยนสถานะ' });
+    }
+});
+
 
 module.exports = router;

@@ -3,17 +3,18 @@ const router = express.Router();
 const Item = require('../models/Item');
 
 // -----------------------------------------
-// [POST] /api/items/add (ร้านค้าเพิ่มเมนูใหม่)
+// [POST] /api/items (ร้านค้าเพิ่มเมนูใหม่)
 // -----------------------------------------
-router.post('/add', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
-    const { name, description, price, restaurantId } = req.body;
+    const { name, description, price, category, restaurantId } = req.body;
 
     // สร้างข้อมูลเมนูใหม่
     const newItem = new Item({
       name,
       description,
       price,
+      category,
       restaurantId
     });
 

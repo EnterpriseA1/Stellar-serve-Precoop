@@ -4,7 +4,7 @@ import axios from 'axios';
 
 export default function SignUp() {
     const [formData, setFormData] = useState({
-        username: '', password: '', name: '', phone: '', role: 'customer'
+        username: '', password: '', name: '', phone: '', role: 'customer', address: '', category: 'other'
     });
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -20,7 +20,7 @@ export default function SignUp() {
         try {
             await axios.post('http://localhost:5000/api/auth/register', formData);
             alert('สมัครสมาชิกสำเร็จ! กรุณาล็อกอิน');
-            navigate('/'); // สมัครเสร็จเด้งกลับไปหน้า Sign In
+            navigate('/');
         } catch (err) {
             setError(err.response?.data?.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก');
         }
@@ -56,8 +56,24 @@ export default function SignUp() {
                         className="w-full px-5 py-3 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer">
                         <option value="customer">Customer (ลูกค้า)</option>
                         <option value="restaurant">Restaurant (ร้านอาหาร)</option>
-
                     </select>
+
+                    {/* แสดง field Address และ Category เฉพาะตอนเลือกเป็นร้านอาหาร */}
+                    {formData.role === 'restaurant' && (
+                        <>
+                            <input type="text" name="address" placeholder="ที่อยู่ร้าน (เช่น 55 Silom, Bangkok)" required
+                                className="w-full px-5 py-3 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                                onChange={handleChange} />
+
+                            <select name="category" value={formData.category} onChange={handleChange}
+                                className="w-full px-5 py-3 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer">
+                                <option value="burger">🍔 Burger</option>
+                                <option value="pizza">🍕 Pizza</option>
+                                <option value="sushi">🍣 Sushi</option>
+                                <option value="other">🍽️ อื่นๆ</option>
+                            </select>
+                        </>
+                    )}
 
                     <button type="submit" className="w-full py-3 font-bold text-[#1a113d] transition duration-200 rounded-full bg-yellow-400 hover:bg-yellow-500">
                         Sign Up
