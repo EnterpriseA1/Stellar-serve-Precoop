@@ -7,7 +7,7 @@ const Item = require('../models/Item');
 // -----------------------------------------
 router.post('/', async (req, res) => {
   try {
-    const { name, description, price, category, restaurantId } = req.body;
+    const { name, description, price, category, restaurantId, imageUrl } = req.body;
 
     // สร้างข้อมูลเมนูใหม่
     const newItem = new Item({
@@ -15,7 +15,8 @@ router.post('/', async (req, res) => {
       description,
       price,
       category,
-      restaurantId
+      restaurantId,
+      imageUrl
     });
 
     await newItem.save();
@@ -59,13 +60,13 @@ router.get('/restaurant/:id', async (req, res) => {
 // -----------------------------------------
 router.put('/update/:id', async (req, res) => {
   try {
-    const { name, description, price, category } = req.body;
+    const { name, description, price, category, imageUrl } = req.body;
 
     // ค้นหาและอัปเดตข้อมูลตาม ID
     const updatedItem = await Item.findByIdAndUpdate(
       req.params.id,
-      { name, description, price, category },
-      { new: true } // ให้คืนค่าข้อมูลตัวที่อัปเดตแล้วกลับมา
+      { name, description, price, category, imageUrl },
+      { returnDocument: 'after' } // ให้คืนค่าข้อมูลตัวที่อัปเดตแล้วกลับมา
     );
 
     if (!updatedItem) {

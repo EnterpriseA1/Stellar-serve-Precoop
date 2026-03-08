@@ -79,12 +79,12 @@ export default function Home() {
 
                 {currentTab === 'cart' && <CartPage cart={cart} addToCart={addToCart} removeFromCart={removeFromCart} setCurrentTab={setCurrentTab} clearCart={() => setCart([])} user={user} />}
 
-                {currentTab === 'search' && <SearchPage />}
+                {currentTab === 'search' && <SearchPage onSelectRestaurant={(restaurant) => { setCurrentTab('home'); }} />}
                 {currentTab === 'orders' && (
                     user.role === 'restaurant' ? <RestaurantOrdersPage user={user} /> : <MyOrdersPage user={user} />
                 )}
                 {currentTab === 'menu' && <MenuManagePage user={user} />}
-                {currentTab === 'profile' && <ProfilePage user={user} />}
+                {currentTab === 'profile' && <ProfilePage user={user} setUser={setUser} />}
             </div>
 
             {/* Navbar แยกตาม role */}

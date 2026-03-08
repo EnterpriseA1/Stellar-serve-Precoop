@@ -7,6 +7,7 @@ export default function CustomerDashboard({ addToCart }) {
     const [loadingRestaurants, setLoadingRestaurants] = React.useState(true);
     const [loadingMenu, setLoadingMenu] = React.useState(false);
     const [selectedCategory, setSelectedCategory] = React.useState(null);
+    const [searchQuery, setSearchQuery] = React.useState('');
 
     // ดึงรายชื่อร้านอาหารจาก API
     React.useEffect(() => {
@@ -41,7 +42,7 @@ export default function CustomerDashboard({ addToCart }) {
                 <div className="p-4 bg-white shadow-sm rounded-2xl">
                     <button
                         onClick={() => { setSelectedRestaurant(null); setMenu([]); }}
-                        className="text-yellow-400 text-sm font-bold mb-2 flex items-center gap-1"
+                        className="inline-flex items-center gap-2 px-4 py-2 mb-3 bg-gray-100 hover:bg-gray-200 text-[#1a113d] font-bold text-sm rounded-full transition active:scale-95"
                     >
                         ← กลับ
                     </button>
@@ -66,7 +67,12 @@ export default function CustomerDashboard({ addToCart }) {
                     {menu.map((item) => (
                         <div key={item._id} className="flex items-center justify-between p-4 bg-white shadow-sm rounded-2xl">
                             <div className="flex items-center gap-3">
-                                <span className="text-3xl">🍽️</span>
+                                <div className="w-16 h-16 rounded-xl overflow-hidden bg-yellow-50 flex-shrink-0 flex items-center justify-center">
+                                    {item.imageUrl
+                                        ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                                        : <span className="text-3xl">🍽️</span>
+                                    }
+                                </div>
                                 <div>
                                     <h4 className="font-bold text-[#1a113d]">{item.name}</h4>
                                     {item.description && (
@@ -95,9 +101,11 @@ export default function CustomerDashboard({ addToCart }) {
         { id: 'other', icon: '🍽️', label: 'อื่นๆ' },
     ];
 
-    const filteredRestaurants = selectedCategory
-        ? restaurants.filter(r => r.category === selectedCategory || (!r.category && selectedCategory === 'other'))
-        : restaurants;
+    const filteredRestaurants = restaurants.filter(r => {
+        const matchesCategory = !selectedCategory || r.category === selectedCategory || (!r.category && selectedCategory === 'other');
+        const matchesSearch = !searchQuery.trim() || r.name?.toLowerCase().includes(searchQuery.toLowerCase()) || r.address?.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesCategory && matchesSearch;
+    });
 
     return (
         <div className="space-y-6">
@@ -125,8 +133,22 @@ export default function CustomerDashboard({ addToCart }) {
 
             {/* รายการร้านอาหาร */}
             <div>
+                {/* Search Bar */}
+                <div className="relative mb-3">
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="ค้นหาร้านอาหาร..."
+                        className="w-full px-5 py-2.5 pl-10 bg-white shadow-sm border border-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-yellow-400 text-sm"
+                    />
+                    <span className="absolute top-2.5 left-3.5 text-gray-400">🔍</span>
+                    {searchQuery && (
+                        <button onClick={() => setSearchQuery('')} className="absolute top-2 right-3 text-gray-400 hover:text-gray-600">✕</button>
+                    )}
+                </div>
                 <h3 className="mb-3 text-lg font-bold">
-                    {selectedCategory ? `ร้านอาหารหมวดหมู่ ${categories.find(c => c.id === selectedCategory)?.label}` : 'ร้านอาหารทั้งหมด'}
+                    {searchQuery ? `ผลลัพธ์สำหรับ "${searchQuery}"` : selectedCategory ? `ร้านอาหารหมวดหมู่ ${categories.find(c => c.id === selectedCategory)?.label}` : 'ร้านอาหารทั้งหมด'}
                 </h3>
 
                 {loadingRestaurants && (
@@ -147,8 +169,11 @@ export default function CustomerDashboard({ addToCart }) {
                             onClick={() => handleSelectRestaurant(restaurant)}
                             className="flex gap-4 p-4 bg-white shadow-sm rounded-2xl cursor-pointer hover:shadow-md transition"
                         >
-                            <div className="w-20 h-20 bg-yellow-100 rounded-xl flex items-center justify-center text-3xl">
-                                🏪
+                            <div className="w-20 h-20 rounded-xl overflow-hidden bg-yellow-100 flex-shrink-0 flex items-center justify-center">
+                                {restaurant.imageUrl
+                                    ? <img src={restaurant.imageUrl} alt={restaurant.name} className="w-full h-full object-cover" />
+                                    : <span className="text-3xl">🏪</span>
+                                }
                             </div>
                             <div>
                                 <h4 className="font-bold text-[#1a113d]">{restaurant.name}</h4>

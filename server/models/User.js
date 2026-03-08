@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     required: true
   },
   address: { type: String },
+  imageUrl: { type: String }, // รูปโปรไฟล์หรือรูปร้าน (Base64)
   isOpen: { type: Boolean, default: true }, // สถานะเปิด/ปิดร้าน (สำหรับ role: restaurant)
   category: {
     type: String,

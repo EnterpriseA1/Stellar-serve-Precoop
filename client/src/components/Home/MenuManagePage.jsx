@@ -1,4 +1,5 @@
 import React from 'react';
+import ImagePicker from './ImagePicker';
 
 export default function MenuManagePage({ user }) {
     const [menu, setMenu] = React.useState([]);
@@ -7,7 +8,7 @@ export default function MenuManagePage({ user }) {
     const [editingId, setEditingId] = React.useState(null);
 
     // Form State
-    const [formData, setFormData] = React.useState({ name: '', description: '', price: '', category: 'other' });
+    const [formData, setFormData] = React.useState({ name: '', description: '', price: '', category: 'other', imageUrl: null });
 
     // ดึงเมนูของร้านตัวเอง
     const fetchMenu = React.useCallback(async () => {
@@ -36,14 +37,15 @@ export default function MenuManagePage({ user }) {
             name: item.name,
             description: item.description || '',
             price: item.price,
-            category: item.category || 'other'
+            category: item.category || 'other',
+            imageUrl: item.imageUrl || null
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const handleCancelEdit = () => {
         setEditingId(null);
-        setFormData({ name: '', description: '', price: '', category: 'other' });
+        setFormData({ name: '', description: '', price: '', category: 'other', imageUrl: null });
     };
 
     const handleSubmit = async (e) => {
@@ -125,6 +127,17 @@ export default function MenuManagePage({ user }) {
                     </div>
                 </div>
 
+                <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">รูปเมนู</label>
+                    <ImagePicker
+                        value={formData.imageUrl}
+                        onChange={(val) => setFormData(prev => ({ ...prev, imageUrl: val }))}
+                        placeholder="🍔"
+                        label="คลิกเพื่ออัปโหลดรูปเมนู"
+                        shape="rect"
+                    />
+                </div>
+
                 <div className="flex gap-3 pt-2">
                     <button type="submit" className="flex-1 py-3 font-bold text-white bg-[#1a113d] rounded-xl hover:bg-[#2d1e5e] transition shadow-md">
                         {editingId ? 'บันทึกการแก้ไข' : 'เพิ่มเมนู'}
@@ -154,12 +167,20 @@ export default function MenuManagePage({ user }) {
                 ) : (
                     menu.map((item) => (
                         <div key={item._id} className="flex items-center justify-between p-4 bg-white shadow-sm rounded-2xl">
-                            <div className="flex-1 mr-4">
-                                <h4 className="font-bold text-[#1a113d] text-lg">{item.name}</h4>
-                                {item.description && <p className="text-sm text-gray-500 leading-tight my-1">{item.description}</p>}
-                                <div className="flex items-center gap-3 mt-1 text-sm font-bold">
-                                    <span className="text-yellow-600">฿ {item.price}</span>
-                                    <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-lg capitalize">{item.category}</span>
+                            <div className="flex gap-4 flex-1 mr-4">
+                                <div className="w-16 h-16 rounded-xl overflow-hidden bg-yellow-50 flex-shrink-0 flex items-center justify-center">
+                                    {item.imageUrl
+                                        ? <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                                        : <span className="text-3xl">🍔</span>
+                                    }
+                                </div>
+                                <div>
+                                    <h4 className="font-bold text-[#1a113d] text-lg">{item.name}</h4>
+                                    {item.description && <p className="text-sm text-gray-500 leading-tight my-1">{item.description}</p>}
+                                    <div className="flex items-center gap-3 mt-1 text-sm font-bold">
+                                        <span className="text-yellow-600">฿ {item.price}</span>
+                                        <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-500 rounded-lg capitalize">{item.category}</span>
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-2">

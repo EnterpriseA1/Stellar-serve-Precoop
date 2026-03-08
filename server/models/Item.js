@@ -15,7 +15,8 @@ const itemSchema = new mongoose.Schema({
     enum: ['burger', 'pizza', 'sushi', 'other'],
     required: true,
     default: 'other'
-  }
+  },
+  imageUrl: { type: String } // รูปเมนู (Base64)
 }, { timestamps: true });
 
 module.exports = mongoose.model('Item', itemSchema);

@@ -79,8 +79,10 @@ export default function CartPage({ cart, addToCart, removeFromCart, setCurrentTa
     if (step === 'address') {
         return (
             <div className="p-6 space-y-4">
-                <div className="flex items-center gap-3">
-                    <button onClick={() => setStep('cart')} className="text-xl">{'<'}</button>
+                <div className="flex items-center gap-3 mb-2">
+                    <button onClick={() => setStep('cart')} className="inline-flex items-center gap-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-[#1a113d] font-bold text-sm rounded-full transition active:scale-95">
+                        ← กลับ
+                    </button>
                     <h2 className="text-2xl font-bold text-[#1a113d]">Delivery Details</h2>
                 </div>
 

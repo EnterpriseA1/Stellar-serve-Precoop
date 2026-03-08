@@ -78,8 +78,12 @@ router.post('/login', async (req, res) => {
                 id: user._id,
                 username: user.username,
                 name: user.name,
+                phone: user.phone,
+                address: user.address,
                 role: user.role,
-                isOpen: user.isOpen // ส่งสถานะเปิด/ปิดร้านด้วย
+                isOpen: user.isOpen,
+                imageUrl: user.imageUrl || null, // รูปโปรไฟล์/ร้าน
+                category: user.category || null
             }
         });
 
@@ -136,7 +140,7 @@ router.patch('/restaurants/:id/toggle', async (req, res) => {
         const updated = await User.findByIdAndUpdate(
             req.params.id,
             { isOpen: newIsOpen },
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         res.json({
@@ -146,6 +150,28 @@ router.patch('/restaurants/:id/toggle', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการเปลี่ยนสถานะ' });
+    }
+});
+
+// -----------------------------------------
+// [PATCH] /api/auth/profile/:id (อัปเดตข้อมูลโปรไฟล์)
+// -----------------------------------------
+router.patch('/profile/:id', async (req, res) => {
+    try {
+        const { name, phone, address, imageUrl } = req.body;
+
+        const updated = await User.findByIdAndUpdate(
+            req.params.id,
+            { name, phone, address, imageUrl },
+            { returnDocument: 'after', select: '-password' }
+        );
+
+        if (!updated) return res.status(404).json({ message: 'ไม่พบผู้ใช้นี้' });
+
+        res.json({ message: 'อัปเดตโปรไฟล์สำเร็จ', user: updated });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'เกิดข้อผิดพลาดในการอัปเดตโปรไฟล์' });
     }
 });
 
