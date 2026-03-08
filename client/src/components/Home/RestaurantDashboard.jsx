@@ -5,6 +5,7 @@ export default function RestaurantDashboard() {
     const [toggling, setToggling] = React.useState(false);
     const [toggleError, setToggleError] = React.useState('');
     const [pendingOrders, setPendingOrders] = React.useState([]);
+    const [totalEarning, setTotalEarning] = React.useState(0);
     const [loadingOrders, setLoadingOrders] = React.useState(true);
 
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -15,8 +16,13 @@ export default function RestaurantDashboard() {
         fetch(`http://localhost:5000/api/orders/restaurant/${storedUser.id}`)
             .then(res => res.json())
             .then(data => {
-                const pending = Array.isArray(data) ? data.filter(o => o.status === 'pending') : [];
-                setPendingOrders(pending);
+                const all = Array.isArray(data) ? data : [];
+                setPendingOrders(all.filter(o => o.status === 'pending'));
+                // คำนวณยอดรวมจากออเดอร์ที่สำเร็จแล้ว
+                const earned = all
+                    .filter(o => o.status === 'completed')
+                    .reduce((sum, o) => sum + (o.totalPrice || 0), 0);
+                setTotalEarning(earned);
             })
             .catch(err => console.error(err))
             .finally(() => setLoadingOrders(false));
@@ -115,7 +121,9 @@ export default function RestaurantDashboard() {
             {/* รายได้ */}
             <div className="p-6 text-white shadow-lg bg-gradient-to-r from-[#1a113d] to-[#2d1e5e] rounded-3xl">
                 <p className="text-sm opacity-80">Total Earning</p>
-                <h2 className="mt-1 text-4xl font-bold text-yellow-400">฿ 1,200</h2>
+                <h2 className="mt-1 text-4xl font-bold text-yellow-400">
+                    ฿ {totalEarning.toLocaleString('th-TH')}
+                </h2>
                 <p className="mt-2 text-sm">มีออเดอร์รอรับ {pendingOrders.length} รายการ</p>
             </div>
 

@@ -5,6 +5,7 @@ import ImagePicker from './ImagePicker';
 export default function ProfilePage({ user, setUser }) {
     const navigate = useNavigate();
     const [showSettings, setShowSettings] = React.useState(false);
+    const [showHelp, setShowHelp] = React.useState(false);
     const [formData, setFormData] = React.useState({
         name: user?.name || '',
         phone: user?.phone || '',
@@ -150,6 +151,25 @@ export default function ProfilePage({ user, setUser }) {
                         >
                             {saving ? '⏳ กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
                         </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Help Center */}
+            <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+                <button
+                    onClick={() => setShowHelp(!showHelp)}
+                    className="w-full p-4 text-left font-bold flex justify-between items-center hover:bg-gray-50 transition"
+                >
+                    <span>🆘 Help Center</span>
+                    <span className="text-gray-400 transition-transform duration-200" style={{ transform: showHelp ? 'rotate(90deg)' : 'rotate(0deg)' }}>›</span>
+                </button>
+
+                {showHelp && (
+                    <div className="px-5 pb-5 border-t pt-3 space-y-1">
+                        <p className="text-sm text-red-500 font-bold">⚠️ หากพบปัญหาการใช้งาน กรุณาติดต่อทีมงานผ่านทาง Email:</p>
+                        <p className="text-sm text-red-500 font-bold">📧 support@stellarserve.com</p>
+                        <p className="text-xs text-gray-400">เราจะตอบกลับภายใน 1-2 วันทำการ</p>
                     </div>
                 )}
             </div>
