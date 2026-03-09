@@ -50,9 +50,21 @@ router.post('/', async (req, res) => {
 router.get('/customer/:id', async (req, res) => {
     try {
         const orders = await Order.find({ customerId: req.params.id })
-            .populate('restaurantId', 'name address')
+            .populate('restaurantId', 'name address imageUrl')
             .sort({ createdAt: -1 }); // เรียงจากใหม่ → เก่า
-        res.json(orders);
+
+        // Check which orders the user has already reviewed
+        const Review = require('../models/Review');
+        const reviews = await Review.find({ customerId: req.params.id }).select('orderId');
+        const reviewedOrderIds = new Set(reviews.map(r => r.orderId.toString()));
+
+        const ordersWithReviewStatus = orders.map(order => {
+            const orderObj = order.toObject();
+            orderObj.isReviewed = reviewedOrderIds.has(order._id.toString());
+            return orderObj;
+        });
+
+        res.json(ordersWithReviewStatus);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงออเดอร์' });

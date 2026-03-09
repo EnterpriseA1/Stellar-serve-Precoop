@@ -1,5 +1,80 @@
 import React from 'react';
 
+function ReviewListModal({ restaurant, onClose }) {
+    const [reviews, setReviews] = React.useState([]);
+    const [loading, setLoading] = React.useState(true);
+
+    React.useEffect(() => {
+        fetch(`http://localhost:5000/api/reviews/restaurant/${restaurant._id}`)
+            .then(res => res.json())
+            .then(data => setReviews(Array.isArray(data) ? data : []))
+            .catch(err => console.error(err))
+            .finally(() => setLoading(false));
+    }, [restaurant]);
+
+    return (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl w-full max-w-md max-h-[80vh] flex flex-col shadow-xl overflow-hidden relative">
+                {/* Header */}
+                <div className="p-4 border-b flex items-center justify-between sticky top-0 bg-white z-10">
+                    <div>
+                        <h3 className="text-lg font-bold text-[#1a113d]">รีวิวของร้าน</h3>
+                        <p className="text-xs text-gray-500">{restaurant.name}</p>
+                    </div>
+                    <button onClick={onClose} className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-gray-200 transition font-bold text-gray-500">
+                        ✕
+                    </button>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {loading ? (
+                        <div className="text-center text-gray-400 py-10">⏳ กำลังโหลดรีวิว...</div>
+                    ) : reviews.length === 0 ? (
+                        <div className="text-center text-gray-400 py-10 flex flex-col items-center gap-2">
+                            <span className="text-4xl">💭</span>
+                            <p className="font-bold">ยังไม่มีรีวิวสำหรับร้านนี้</p>
+                        </div>
+                    ) : (
+                        reviews.map(review => (
+                            <div key={review._id} className="bg-gray-50 p-4 rounded-2xl flex gap-3">
+                                {/* Avatar */}
+                                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0 overflow-hidden text-lg font-bold text-indigo-500">
+                                    {review.customerId?.imageUrl ? (
+                                        <img src={review.customerId.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                                    ) : (
+                                        review.customerId?.name?.charAt(0).toUpperCase() || '👤'
+                                    )}
+                                </div>
+                                <div className="flex-1">
+                                    <div className="flex items-start justify-between">
+                                        <div>
+                                            <p className="font-bold text-sm text-[#1a113d]">
+                                                {review.customerId?.name || 'ลูกค้า'}
+                                            </p>
+                                            <p className="text-[10px] text-gray-400">
+                                                {new Date(review.createdAt).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}
+                                            </p>
+                                        </div>
+                                        <div className="flex text-yellow-400 text-sm">
+                                            {Array.from({ length: 5 }).map((_, i) => (
+                                                <span key={i} className={i < review.rating ? 'opacity-100' : 'opacity-30'}>★</span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {review.comment && (
+                                        <p className="text-sm mt-2 text-gray-600 leading-relaxed bg-white p-2 border rounded-xl">{review.comment}</p>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function CustomerDashboard({ addToCart }) {
     const [selectedRestaurant, setSelectedRestaurant] = React.useState(null);
     const [restaurants, setRestaurants] = React.useState([]);
@@ -8,6 +83,7 @@ export default function CustomerDashboard({ addToCart }) {
     const [loadingMenu, setLoadingMenu] = React.useState(false);
     const [selectedCategory, setSelectedCategory] = React.useState(null);
     const [searchQuery, setSearchQuery] = React.useState('');
+    const [viewingReviewsFor, setViewingReviewsFor] = React.useState(null);
 
     // ดึงรายชื่อร้านอาหารจาก API
     React.useEffect(() => {
@@ -46,9 +122,24 @@ export default function CustomerDashboard({ addToCart }) {
                     >
                         ← กลับ
                     </button>
-                    <h3 className="text-xl font-bold text-[#1a113d]">{selectedRestaurant.name}</h3>
-                    <p className="text-xs text-gray-500 mt-1">📍 {selectedRestaurant.address || 'ไม่ระบุที่อยู่'}</p>
-                    <p className="text-xs text-gray-500">📞 {selectedRestaurant.phone}</p>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="text-xl font-bold text-[#1a113d]">{selectedRestaurant.name}</h3>
+                            <p className="text-xs text-gray-500 mt-1">📍 {selectedRestaurant.address || 'ไม่ระบุที่อยู่'}</p>
+                            <p className="text-xs text-gray-500">📞 {selectedRestaurant.phone}</p>
+                        </div>
+                        <div className="text-right flex flex-col items-end gap-1">
+                            <span className="inline-block bg-yellow-100 text-yellow-700 font-bold px-3 py-1 rounded-full text-sm">
+                                ⭐ {selectedRestaurant.averageRating > 0 ? selectedRestaurant.averageRating : 'ยังไม่มีรีวิว'} {selectedRestaurant.reviewCount > 0 && `(${selectedRestaurant.reviewCount})`}
+                            </span>
+                            <button
+                                onClick={() => setViewingReviewsFor(selectedRestaurant)}
+                                className="text-xs text-indigo-500 hover:text-indigo-700 font-bold underline cursor-pointer border-none bg-transparent p-0"
+                            >
+                                ดูรีวิวทั้งหมด
+                            </button>
+                        </div>
+                    </div>
                 </div>
                 <h4 className="text-lg font-bold text-[#1a113d]">เมนู</h4>
 
@@ -90,6 +181,14 @@ export default function CustomerDashboard({ addToCart }) {
                         </div>
                     ))}
                 </div>
+
+                {/* Modal ดูรีวิว (สำหรับหน้ารายละเอียดร้าน) */}
+                {viewingReviewsFor && (
+                    <ReviewListModal
+                        restaurant={viewingReviewsFor}
+                        onClose={() => setViewingReviewsFor(null)}
+                    />
+                )}
             </div>
         );
     }
@@ -178,14 +277,36 @@ export default function CustomerDashboard({ addToCart }) {
                             <div>
                                 <h4 className="font-bold text-[#1a113d]">{restaurant.name}</h4>
                                 {restaurant.address && (
-                                    <p className="text-sm text-gray-500">📍 {restaurant.address}</p>
+                                    <p className="text-sm text-gray-500 mb-1">📍 {restaurant.address}</p>
                                 )}
-                                <p className="text-sm text-gray-500">📞 {restaurant.phone}</p>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex flex-col items-start gap-1">
+                                        <p className="text-xs font-bold text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-md">⭐ {restaurant.averageRating > 0 ? restaurant.averageRating : 'ยังไม่มีรีวิว'} {restaurant.reviewCount > 0 && `(${restaurant.reviewCount})`}</p>
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setViewingReviewsFor(restaurant);
+                                            }}
+                                            className="text-[10px] text-indigo-500 hover:text-indigo-700 font-bold underline cursor-pointer border-none bg-transparent p-0 pl-1"
+                                        >
+                                            ดูรีวิวทั้งหมด
+                                        </button>
+                                    </div>
+                                    <p className="text-xs text-gray-500 h-full flex items-center mt-[-15px]">📞 {restaurant.phone}</p>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
+
+            {/* Modal ดูรีวิว */}
+            {viewingReviewsFor && (
+                <ReviewListModal
+                    restaurant={viewingReviewsFor}
+                    onClose={() => setViewingReviewsFor(null)}
+                />
+            )}
         </div>
     );
 }

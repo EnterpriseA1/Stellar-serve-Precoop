@@ -7,6 +7,8 @@ export default function RestaurantDashboard() {
     const [pendingOrders, setPendingOrders] = React.useState([]);
     const [totalEarning, setTotalEarning] = React.useState(0);
     const [loadingOrders, setLoadingOrders] = React.useState(true);
+    const [reviews, setReviews] = React.useState([]);
+    const [loadingReviews, setLoadingReviews] = React.useState(true);
 
     const storedUser = JSON.parse(localStorage.getItem('user'));
 
@@ -57,6 +59,17 @@ export default function RestaurantDashboard() {
             });
 
         fetchOrders();
+
+        // โหลดรีวิวของร้าน
+        setLoadingReviews(true);
+        fetch(`http://localhost:5000/api/reviews/restaurant/${stored.id}`)
+            .then(res => res.json())
+            .then(data => {
+                setReviews(Array.isArray(data) ? data : []);
+            })
+            .catch(err => console.error('โหลดรีวิวไม่สำเร็จ:', err))
+            .finally(() => setLoadingReviews(false));
+
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -118,13 +131,30 @@ export default function RestaurantDashboard() {
                 )}
             </div>
 
-            {/* รายได้ */}
-            <div className="p-6 text-white shadow-lg bg-gradient-to-r from-[#1a113d] to-[#2d1e5e] rounded-3xl">
-                <p className="text-sm opacity-80">Total Earning</p>
-                <h2 className="mt-1 text-4xl font-bold text-yellow-400">
-                    ฿ {totalEarning.toLocaleString('th-TH')}
-                </h2>
-                <p className="mt-2 text-sm">มีออเดอร์รอรับ {pendingOrders.length} รายการ</p>
+            {/* สรุปรายได้และเรตติ้ง */}
+            <div className="grid grid-cols-2 gap-4">
+                {/* รายได้ */}
+                <div className="p-5 text-white shadow-sm bg-gradient-to-br from-[#1a113d] to-[#2d1e5e] rounded-3xl flex flex-col justify-center items-center text-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 -mt-2 -mr-2 text-white/10 text-5xl">💰</div>
+                    <p className="text-xs opacity-80 mb-1 z-10">รายได้รวม</p>
+                    <h2 className="text-2xl sm:text-3xl font-bold text-yellow-400 z-10">
+                        ฿{totalEarning.toLocaleString('th-TH')}
+                    </h2>
+                </div>
+
+                {/* เรตติ้งเฉลี่ย */}
+                <div className="p-5 bg-white shadow-sm border border-gray-100 rounded-3xl flex flex-col justify-center items-center text-center">
+                    <p className="text-xs text-gray-500 font-bold mb-1">คะแนนเฉลี่ยร้านคุณ</p>
+                    <div className="flex items-end gap-1">
+                        <span className="text-2xl sm:text-3xl font-bold text-[#1a113d]">
+                            {reviews.length > 0
+                                ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+                                : '0.0'}
+                        </span>
+                        <span className="text-sm font-bold text-yellow-500 mb-1">⭐</span>
+                    </div>
+                    <p className="text-[10px] text-gray-400 mt-1">{reviews.length} รีวิว</p>
+                </div>
             </div>
 
             <div>
@@ -167,6 +197,57 @@ export default function RestaurantDashboard() {
                                 >
                                     ❌ Reject
                                 </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* ส่วนรีวิวที่ลูกค้าเข้ามาให้ */}
+            <div className="pt-4 border-t">
+                <h3 className="mb-3 text-lg font-bold flex items-center justify-between">
+                    <span>รีวิวล่าสุด</span>
+                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full">{reviews.length} รีวิว</span>
+                </h3>
+
+                {loadingReviews && <div className="text-center text-gray-400 py-4">⏳ กำลังโหลด...</div>}
+
+                {!loadingReviews && reviews.length === 0 && (
+                    <div className="text-center text-gray-400 py-6 bg-gray-50 rounded-2xl border-dashed border-2 border-gray-200">
+                        <span className="text-3xl">📝</span>
+                        <p className="font-bold text-sm mt-2">ยังไม่มีรีวิวจากลูกค้า</p>
+                    </div>
+                )}
+
+                <div className="space-y-3">
+                    {reviews.map((review) => (
+                        <div key={review._id} className="p-4 bg-white shadow-sm border border-gray-50 rounded-2xl flex gap-3">
+                            <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0 text-indigo-400 font-bold overflow-hidden border">
+                                {review.customerId?.imageUrl ? (
+                                    <img src={review.customerId.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    review.customerId?.name?.charAt(0).toUpperCase() || '👤'
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <p className="font-bold text-sm text-[#1a113d]">
+                                            {review.customerId?.name || 'ลูกค้า'}
+                                        </p>
+                                        <p className="text-[10px] text-gray-400">
+                                            {new Date(review.createdAt).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                        </p>
+                                    </div>
+                                    <div className="flex text-yellow-400 text-xs">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <span key={i} className={i < review.rating ? 'opacity-100' : 'opacity-30'}>★</span>
+                                        ))}
+                                    </div>
+                                </div>
+                                {review.comment && (
+                                    <p className="text-sm mt-2 text-gray-600 bg-gray-50 p-2.5 rounded-xl">{review.comment}</p>
+                                )}
                             </div>
                         </div>
                     ))}

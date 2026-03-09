@@ -102,7 +102,36 @@ router.get('/restaurants', async (req, res) => {
             { role: 'restaurant', isOpen: true }, // เฉพาะร้านที่เปิดอยู่
             { password: 0 } // ไม่ส่งรหัสผ่าน แต่อื่นๆ รวม category ส่งไปหมด
         );
-        res.json(restaurants);
+
+        // ดึงรีวิวทั้งหมดมาคำนวณเรตติ้ง
+        const Review = require('../models/Review');
+        const ratings = await Review.aggregate([
+            { $group: { _id: "$restaurantId", averageRating: { $avg: "$rating" }, reviewCount: { $sum: 1 } } }
+        ]);
+
+        const ratingMap = {};
+        ratings.forEach(r => {
+            // r._id is an ObjectId returned by mongoose, so toString() is essential
+            ratingMap[r._id.toString()] = {
+                averageRating: Number(r.averageRating.toFixed(1)),
+                reviewCount: r.reviewCount
+            };
+        });
+
+        const restaurantsWithRatings = restaurants.map(restaurant => {
+            const restObj = restaurant.toObject();
+            const ratingData = ratingMap[restaurant._id.toString()];
+            if (ratingData) {
+                restObj.averageRating = ratingData.averageRating;
+                restObj.reviewCount = ratingData.reviewCount;
+            } else {
+                restObj.averageRating = 0;
+                restObj.reviewCount = 0;
+            }
+            return restObj;
+        });
+
+        res.json(restaurantsWithRatings);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'เกิดข้อผิดพลาดในการดึงข้อมูลร้านอาหาร' });
