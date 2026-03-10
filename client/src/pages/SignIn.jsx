@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import logo from '../assets/logo.png';
 
 export default function SignIn() {
   const [username, setUsername] = useState('');
@@ -24,7 +25,7 @@ export default function SignIn() {
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
       alert('เข้าสู่ระบบสำเร็จ!');
-      
+
       // แยกหน้าตาม Role ของ User (MVP: ส่งไปหน้า Home ก่อน)
       navigate('/home');
 
@@ -38,14 +39,15 @@ export default function SignIn() {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-3xl shadow-lg">
         <div className="text-center">
+          <img src={logo} alt="StellarServe Logo" className="w-24 h-24 mx-auto mb-2" />
           <h2 className="text-3xl font-bold text-[#1a113d]">StellarServe</h2>
         </div>
-        
+
         <h3 className="text-xl font-bold text-gray-800">Sign In</h3>
 
         {/* โชว์ Error ถ้ามี */}
         {error && <div className="p-3 text-sm text-red-600 bg-red-100 rounded-lg">{error}</div>}
-        
+
         <form className="space-y-5" onSubmit={handleLogin}>
           <div>
             <input
@@ -67,7 +69,7 @@ export default function SignIn() {
               required
             />
           </div>
-          
+
           <button type="submit" className="w-full py-3 mt-4 font-bold text-white transition duration-200 rounded-full bg-[#1a113d] hover:bg-[#2d1e5e]">
             Sign In
           </button>

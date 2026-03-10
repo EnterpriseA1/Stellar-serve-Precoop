@@ -85,15 +85,38 @@ export default function CustomerDashboard({ addToCart }) {
     const [searchQuery, setSearchQuery] = React.useState('');
     const [viewingReviewsFor, setViewingReviewsFor] = React.useState(null);
 
+    // Slide Show State
+    const [currentSlideIndex, setCurrentSlideIndex] = React.useState(0);
+    // Randomize once when restaurants load
+    const [slidingRestaurants, setSlidingRestaurants] = React.useState([]);
+
     // ดึงรายชื่อร้านอาหารจาก API
     React.useEffect(() => {
         setLoadingRestaurants(true);
         fetch('http://localhost:5000/api/auth/restaurants')
             .then(res => res.json())
-            .then(data => setRestaurants(data))
+            .then(data => {
+                setRestaurants(data);
+                if (data.length > 0) {
+                    // สุ่มร้านอาหาร 3-5 ร้านมาโชว์บน Banner
+                    const shuffled = [...data].sort(() => 0.5 - Math.random());
+                    setSlidingRestaurants(shuffled.slice(0, 5));
+                }
+            })
             .catch(err => console.error(err))
             .finally(() => setLoadingRestaurants(false));
     }, []);
+
+    // Timer สำหรับเปลี่ยน Slide
+    React.useEffect(() => {
+        if (slidingRestaurants.length <= 1) return; // ไม่ต้องสไลด์ถ้ามีไม่ถึง 2 ร้าน
+
+        const timer = setInterval(() => {
+            setCurrentSlideIndex((prev) => (prev + 1) % slidingRestaurants.length);
+        }, 3000); // วนทุก 3 วินาที
+
+        return () => clearInterval(timer);
+    }, [slidingRestaurants]);
 
     // ดึงเมนูของร้านที่เลือก
     const handleSelectRestaurant = async (restaurant) => {
@@ -208,9 +231,70 @@ export default function CustomerDashboard({ addToCart }) {
 
     return (
         <div className="space-y-6">
-            {/* Banner */}
-            <div className="flex items-center justify-center h-32 shadow-sm bg-yellow-300 rounded-2xl">
-                <h2 className="text-2xl font-bold text-[#1a113d]">Special Offers!</h2>
+            {/* Banner Slide Show */}
+            <div className="relative overflow-hidden shadow-sm bg-yellow-300 rounded-2xl h-40">
+                {slidingRestaurants.length > 0 ? (
+                    <div
+                        className="flex transition-transform duration-500 ease-in-out h-full"
+                        style={{ transform: `translateX(-${currentSlideIndex * 100}%)` }}
+                    >
+                        {slidingRestaurants.map((r, index) => (
+                            <div
+                                key={`slide-${index}`}
+                                className="w-full h-full flex-shrink-0 relative cursor-pointer group"
+                                onClick={() => handleSelectRestaurant(r)}
+                            >
+                                {/* ถ้ามีรูปร้านอาหาร ให้ใช้รูปเป็น bg หรือใส่รูป (สมมติว่าถ้าไม่มีให้เป็นสีพื้นๆ) */}
+                                {r.imageUrl ? (
+                                    <div className="absolute inset-0 w-full h-full">
+                                        <img src={r.imageUrl} alt={r.name} className="w-full h-full object-cover" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+                                    </div>
+                                ) : (
+                                    <div className="absolute inset-0 bg-yellow-400 w-full h-full flex items-center justify-center">
+                                        <span className="text-6xl opacity-20">🏪</span>
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                    </div>
+                                )}
+
+                                <div className="absolute bottom-0 left-0 p-4 w-full">
+                                    <h2 className="text-2xl font-bold text-white drop-shadow-md">
+                                        {r.name}
+                                    </h2>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className="text-xs bg-yellow-400 text-[#1a113d] font-bold px-2 py-0.5 rounded-full shadow-sm shadow-yellow-500/50">
+                                            ⭐ {r.averageRating > 0 ? r.averageRating : 'New'}
+                                        </span>
+                                        <span className="text-xs text-white/90 truncate">
+                                            {r.address || 'Special Offer!'}
+                                        </span>
+                                        <span className="text-xs text-white bg-white/20 px-2 py-0.5 rounded-full ml-auto group-hover:bg-white group-hover:text-[#1a113d] transition-colors">
+                                            สั่งเลย →
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    // Default Banner ถ้ายังไม่มีข้อมูล
+                    <div className="flex flex-col items-center justify-center h-full text-[#1a113d]">
+                        <h2 className="text-2xl font-bold mb-1">Special Offers!</h2>
+                        <p className="text-sm opacity-80">🔥 ลดแรงทุกวัน 🔥</p>
+                    </div>
+                )}
+
+                {/* Dots indicator */}
+                {slidingRestaurants.length > 1 && (
+                    <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
+                        {slidingRestaurants.map((_, idx) => (
+                            <div
+                                key={`dot-${idx}`}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentSlideIndex ? 'w-4 bg-yellow-400 shadow-[0_0_4px_rgba(250,204,21,0.8)]' : 'w-1.5 bg-white/50 hover:bg-white/80'}`}
+                            ></div>
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* Category */}

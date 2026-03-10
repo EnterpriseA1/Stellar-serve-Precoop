@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import logo from '../assets/logo.png';
 
 export default function SignUp() {
     const [formData, setFormData] = useState({
@@ -29,7 +30,10 @@ export default function SignUp() {
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-50">
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-3xl shadow-lg">
-                <h2 className="text-3xl font-bold text-center text-[#1a113d]">StellarServe</h2>
+                <div className="text-center">
+                    <img src={logo} alt="StellarServe Logo" className="w-24 h-24 mx-auto mb-2" />
+                    <h2 className="text-3xl font-bold text-[#1a113d]">StellarServe</h2>
+                </div>
                 <h3 className="text-xl font-bold text-gray-800">Sign Up</h3>
 
                 {error && <div className="p-3 text-sm text-red-600 bg-red-100 rounded-lg">{error}</div>}

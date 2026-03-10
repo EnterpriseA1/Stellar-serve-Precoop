@@ -17,10 +17,19 @@ export default function Home() {
     const [user, setUser] = useState(null);
     const [currentTab, setCurrentTab] = useState('home');
     const [cart, setCart] = useState([]); // cart state
+    const [pendingItem, setPendingItem] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
     const navigate = useNavigate();
 
     // เพิ่มสินค้าลงตะกร้า
     const addToCart = (item) => {
+        // เช็คว่ามีสินค้าในตะกร้ากี่ชิ้น และมาจากคนละร้านหรือไม่ (เช็คจาก state cart โดยตรง)
+        if (cart.length > 0 && cart[0].restaurantId !== item.restaurantId) {
+            setPendingItem(item);
+            setShowConfirmModal(true);
+            return; // ยังไม่เพิ่มสินค้าลงในตะกร้า จนกว่าจะยืนยัน
+        }
+
         setCart(prev => {
             const existing = prev.find(c => c.id === item.id);
             if (existing) {
@@ -28,6 +37,19 @@ export default function Home() {
             }
             return [...prev, { ...item, qty: 1 }];
         });
+    };
+
+    const handleConfirmClearCart = () => {
+        if (pendingItem) {
+            setCart([{ ...pendingItem, qty: 1 }]);
+        }
+        setShowConfirmModal(false);
+        setPendingItem(null);
+    };
+
+    const handleCancelClearCart = () => {
+        setShowConfirmModal(false);
+        setPendingItem(null);
     };
 
     // ลดจำนวนหรือลบออกจากตะกร้า
@@ -92,6 +114,35 @@ export default function Home() {
                 ? <NavbarRestaurant currentTab={currentTab} setCurrentTab={setCurrentTab} />
                 : <Navbar currentTab={currentTab} setCurrentTab={setCurrentTab} cartCount={cartCount} />
             }
+
+            {/* Modal ยืนยันเคลียร์ตะกร้า */}
+            {showConfirmModal && (
+                <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-xl flex flex-col items-center text-center">
+                        <div className="w-16 h-16 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center text-3xl mb-4">
+                            ⚠️
+                        </div>
+                        <h3 className="text-xl font-bold text-[#1a113d] mb-2">สั่งอาหารข้ามร้าน?</h3>
+                        <p className="text-gray-600 mb-6 text-sm">
+                            คุณมีรายการอาหารจากร้านอื่นในตะกร้า ต้องการล้างตะกร้าเพื่อเริ่มต้นสั่งจากร้าน <span className="font-bold text-[#1a113d]">"{pendingItem?.restaurantName}"</span> แทนหรือไม่?
+                        </p>
+                        <div className="flex gap-3 w-full">
+                            <button
+                                onClick={handleCancelClearCart}
+                                className="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition cursor-pointer"
+                            >
+                                ยกเลิก
+                            </button>
+                            <button
+                                onClick={handleConfirmClearCart}
+                                className="flex-1 py-3 px-4 bg-yellow-400 hover:bg-yellow-500 text-[#1a113d] font-bold rounded-xl transition shadow-[0_4px_0_0_#d9b800] hover:shadow-[0_2px_0_0_#d9b800] hover:translate-y-[2px] cursor-pointer"
+                            >
+                                ล้างตะกร้า
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );
