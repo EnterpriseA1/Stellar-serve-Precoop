@@ -11,7 +11,12 @@ const app = express();
 
 
 // Middleware พื้นฐาน
-app.use(cors()); // ยอมรับ Request จาก Frontend (React)
+app.use(cors({
+    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // ใส่ origin ของ Frontend
+    credentials: true, // อนุญาตให้ส่ง Cookie หรือ Header Authorization
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+}));
 app.use(express.json({ limit: '10mb' })); // เพิ่ม limit สำหรับรูปภาพ Base64
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 

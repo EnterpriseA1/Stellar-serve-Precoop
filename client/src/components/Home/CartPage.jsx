@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from '../../utils/axiosConfig';
 
 export default function CartPage({ cart, addToCart, removeFromCart, setCurrentTab, clearCart, user }) {
     const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -31,31 +32,22 @@ export default function CartPage({ cart, addToCart, removeFromCart, setCurrentTa
         setOrdering(true);
         setOrderError('');
         try {
-            const res = await fetch('http://localhost:5000/api/orders', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    customerId: user.id,
-                    restaurantId: rId,
-                    items: cart.map(item => ({
-                        itemId: item._id || item.id,
-                        name: item.name,
-                        price: item.price,
-                        quantity: item.qty
-                    })),
-                    totalPrice: total + 30,
-                    deliveryAddress: address
-                })
+            await axios.post('/orders', {
+                customerId: user.id,
+                restaurantId: rId,
+                items: cart.map(item => ({
+                    itemId: item._id || item.id,
+                    name: item.name,
+                    price: item.price,
+                    quantity: item.qty
+                })),
+                totalPrice: total + 30,
+                deliveryAddress: address
             });
-            const data = await res.json();
-            if (!res.ok) {
-                setOrderError(data.message || 'สั่งออเดอร์ไม่สำเร็จ');
-                return;
-            }
             clearCart();
             setCurrentTab('orders');
         } catch (err) {
-            setOrderError('เชื่อมต่อ Server ไม่ได้ กรุณาลองใหม่');
+            setOrderError(err.response?.data?.message || 'เชื่อมต่อ Server ไม่ได้ กรุณาลองใหม่');
         } finally {
             setOrdering(false);
         }

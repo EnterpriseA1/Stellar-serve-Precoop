@@ -1,5 +1,6 @@
 import React from 'react';
 import ImagePicker from './ImagePicker';
+import axios from '../../utils/axiosConfig';
 
 export default function MenuManagePage({ user }) {
     const [menu, setMenu] = React.useState([]);
@@ -15,9 +16,8 @@ export default function MenuManagePage({ user }) {
         if (!user?.id) return;
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/items/restaurant/${user.id}`);
-            const data = await res.json();
-            setMenu(Array.isArray(data) ? data : []);
+            const res = await axios.get(`/items/restaurant/${user.id}`);
+            setMenu(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             setError('ดึงข้อมูลเมนูไม่สำเร็จ');
         } finally {
@@ -59,33 +59,22 @@ export default function MenuManagePage({ user }) {
         try {
             if (editingId) {
                 // อัปเดตเมนู
-                const res = await fetch(`http://localhost:5000/api/items/update/${editingId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                if (!res.ok) throw new Error('แก้ไขเมนูไม่สำเร็จ');
+                await axios.put(`/items/update/${editingId}`, formData);
             } else {
                 // เพิ่มเมนูใหม่
-                const res = await fetch('http://localhost:5000/api/items', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ...formData, restaurantId: user.id })
-                });
-                if (!res.ok) throw new Error('เพิ่มเมนูไม่สำเร็จ');
+                await axios.post('/items', { ...formData, restaurantId: user.id });
             }
             handleCancelEdit(); // ล้างฟอร์ม
             fetchMenu(); // ดึงข้อมูลใหม่
         } catch (err) {
-            setError(err.message);
+            setError(err.response?.data?.message || err.message);
         }
     };
 
     const handleDelete = async (id) => {
         if (!window.confirm('คุณแน่ใจหรือไม่ที่จะลบเมนูนี้?')) return;
         try {
-            const res = await fetch(`http://localhost:5000/api/items/delete/${id}`, { method: 'DELETE' });
-            if (!res.ok) throw new Error('ลบเมนูไม่สำเร็จ');
+            await axios.delete(`/items/delete/${id}`);
             setMenu(prev => prev.filter(item => item._id !== id));
         } catch (err) {
             setError(err.message);

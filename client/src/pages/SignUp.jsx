@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../utils/axiosConfig';
 import logo from '../assets/logo.png';
 
 export default function SignUp() {
@@ -20,7 +20,7 @@ export default function SignUp() {
         setError('');
 
         try {
-            await axios.post('http://localhost:5000/api/auth/register', formData);
+            await axios.post('/auth/register', formData);
             setShowSuccess(true);
             setTimeout(() => {
                 navigate('/');

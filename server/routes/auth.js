@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { verifyToken } = require('../middleware/auth');
 
 // JWT Secret Key (เอาไว้เข้ารหัส Token - ปกติควรเอาไปไว้ในไฟล์ .env)
 const JWT_SECRET = process.env.JWT_SECRET || 'stellarserve_super_secret_key';
@@ -156,7 +157,7 @@ router.get('/restaurants/:id/status', async (req, res) => {
 // -----------------------------------------
 // [PATCH] /api/auth/restaurants/:id/toggle (เปิด/ปิดร้าน)
 // -----------------------------------------
-router.patch('/restaurants/:id/toggle', async (req, res) => {
+router.patch('/restaurants/:id/toggle', verifyToken, async (req, res) => {
     try {
         // ดึงสถานะปัจจุบันก่อน (isOpen อาจ undefined ใน document เก่า → ถือว่า true)
         const restaurant = await User.findById(req.params.id);
@@ -187,7 +188,7 @@ router.patch('/restaurants/:id/toggle', async (req, res) => {
 // -----------------------------------------
 // [PATCH] /api/auth/profile/:id (อัปเดตข้อมูลโปรไฟล์)
 // -----------------------------------------
-router.patch('/profile/:id', async (req, res) => {
+router.patch('/profile/:id', verifyToken, async (req, res) => {
     try {
         const { name, phone, address, imageUrl } = req.body;
 

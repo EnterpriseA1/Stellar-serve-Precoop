@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import axios from '../utils/axiosConfig';
 import logo from '../assets/logo.png';
 
 export default function SignIn() {
@@ -16,7 +16,7 @@ export default function SignIn() {
 
     try {
       // ยิง API ไปที่ Backend
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
+      const res = await axios.post('/auth/login', {
         username,
         password
       });

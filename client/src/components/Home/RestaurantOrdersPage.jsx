@@ -1,5 +1,6 @@
 import React from 'react';
 import { STATUS_LABEL } from './constants';
+import axios from '../../utils/axiosConfig';
 
 export default function RestaurantOrdersPage({ user }) {
     const [orders, setOrders] = React.useState([]);
@@ -9,10 +10,9 @@ export default function RestaurantOrdersPage({ user }) {
         if (!user?.id) return;
         setLoading(true);
         try {
-            const res = await fetch(`http://localhost:5000/api/orders/restaurant/${user.id}`);
-            const data = await res.json();
+            const res = await axios.get(`/orders/restaurant/${user.id}`);
             // ไม่แสดง pending เพราะ pending จะแสดงที่หน้า Home (Dashboard) รอรับออเดอร์
-            setOrders(Array.isArray(data) ? data.filter(o => o.status !== 'pending') : []);
+            setOrders(Array.isArray(res.data) ? res.data.filter(o => o.status !== 'pending') : []);
         } catch (err) {
             console.error(err);
         } finally {
@@ -26,11 +26,7 @@ export default function RestaurantOrdersPage({ user }) {
 
     const handleUpdateStatus = async (orderId, status) => {
         try {
-            await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            });
+            await axios.patch(`/orders/${orderId}/status`, { status });
             fetchOrders();
         } catch (err) {
             console.error('อัปเดตสถานะไม่สำเร็จ:', err);

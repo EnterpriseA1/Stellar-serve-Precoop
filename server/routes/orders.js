@@ -2,11 +2,12 @@ const express = require('express');
 const router = express.Router();
 const Order = require('../models/Order');
 const Item = require('../models/Item');
+const { verifyToken } = require('../middleware/auth');
 
 // -----------------------------------------
 // [POST] /api/orders (ลูกค้าสั่งออเดอร์)
 // -----------------------------------------
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
     try {
         const { customerId, restaurantId, items, deliveryAddress } = req.body;
 
@@ -47,7 +48,7 @@ router.post('/', async (req, res) => {
 // -----------------------------------------
 // [GET] /api/orders/customer/:id (ลูกค้าดูประวัติออเดอร์ของตัวเอง)
 // -----------------------------------------
-router.get('/customer/:id', async (req, res) => {
+router.get('/customer/:id', verifyToken, async (req, res) => {
     try {
         const orders = await Order.find({ customerId: req.params.id })
             .populate('restaurantId', 'name address imageUrl')
@@ -74,7 +75,7 @@ router.get('/customer/:id', async (req, res) => {
 // -----------------------------------------
 // [GET] /api/orders/restaurant/:id (ร้านค้าดูออเดอร์ที่เข้ามา)
 // -----------------------------------------
-router.get('/restaurant/:id', async (req, res) => {
+router.get('/restaurant/:id', verifyToken, async (req, res) => {
     try {
         const orders = await Order.find({ restaurantId: req.params.id })
             .populate('customerId', 'name phone')
@@ -89,7 +90,7 @@ router.get('/restaurant/:id', async (req, res) => {
 // -----------------------------------------
 // [PATCH] /api/orders/:id/status (ร้านค้าเปลี่ยนสถานะออเดอร์)
 // -----------------------------------------
-router.patch('/:id/status', async (req, res) => {
+router.patch('/:id/status', verifyToken, async (req, res) => {
     try {
         const { status } = req.body;
         const validStatuses = ['pending', 'preparing', 'ready', 'delivering', 'completed', 'cancelled'];

@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from '../../utils/axiosConfig';
 
 // ขั้นตอนสถานะออเดอร์ตามลำดับ
 const STEPS = [
@@ -69,26 +70,17 @@ function ReviewModal({ order, onClose, onSubmit }) {
         e.preventDefault();
         setLoading(true);
         try {
-            const res = await fetch('http://localhost:5000/api/reviews', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    orderId: order._id,
-                    customerId: order.customerId?._id || order.customerId,
-                    restaurantId: order.restaurantId?._id || order.restaurantId,
-                    rating,
-                    comment
-                })
+            const res = await axios.post('/reviews', {
+                orderId: order._id,
+                customerId: order.customerId?._id || order.customerId,
+                restaurantId: order.restaurantId?._id || order.restaurantId,
+                rating,
+                comment
             });
-            if (res.ok) {
-                onSubmit(order._id);
-            } else {
-                const data = await res.json();
-                alert(data.message || 'ส่งรีวิวไม่สำเร็จ');
-            }
+            onSubmit(order._id);
         } catch (err) {
             console.error(err);
-            alert('เกิดข้อผิดพลาด');
+            alert(err.response?.data?.message || 'เกิดข้อผิดพลาด');
         } finally {
             setLoading(false);
         }
@@ -153,9 +145,8 @@ export default function MyOrdersPage({ user }) {
 
     React.useEffect(() => {
         if (!user?.id) return;
-        fetch(`http://localhost:5000/api/orders/customer/${user.id}`)
-            .then(res => res.json())
-            .then(data => setOrders(Array.isArray(data) ? data : []))
+        axios.get(`/orders/customer/${user.id}`)
+            .then(res => setOrders(Array.isArray(res.data) ? res.data : []))
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
     }, [user]);

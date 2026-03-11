@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from '../../utils/axiosConfig';
 
 export default function RestaurantDashboard() {
     const [isOpen, setIsOpen] = React.useState(null);
@@ -15,10 +16,9 @@ export default function RestaurantDashboard() {
     const fetchOrders = () => {
         if (!storedUser?.id) return;
         setLoadingOrders(true);
-        fetch(`http://localhost:5000/api/orders/restaurant/${storedUser.id}`)
-            .then(res => res.json())
-            .then(data => {
-                const all = Array.isArray(data) ? data : [];
+        axios.get(`/orders/restaurant/${storedUser.id}`)
+            .then(res => {
+                const all = Array.isArray(res.data) ? res.data : [];
                 setPendingOrders(all.filter(o => o.status === 'pending'));
                 // คำนวณยอดรวมจากออเดอร์ที่สำเร็จแล้ว
                 const earned = all
@@ -32,11 +32,7 @@ export default function RestaurantDashboard() {
 
     const handleOrderStatus = async (orderId, status) => {
         try {
-            await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status })
-            });
+            await axios.patch(`/orders/${orderId}/status`, { status });
             fetchOrders(); // รีโหลดออเดอร์หลังอัปเดต
         } catch (err) {
             console.error('อัปเดตสถานะไม่สำเร็จ:', err);
@@ -48,10 +44,9 @@ export default function RestaurantDashboard() {
         const stored = JSON.parse(localStorage.getItem('user'));
         if (!stored) return;
 
-        fetch(`http://localhost:5000/api/auth/restaurants/${stored.id}/status`)
-            .then(res => res.json())
-            .then(data => {
-                if (typeof data.isOpen === 'boolean') setIsOpen(data.isOpen);
+        axios.get(`/auth/restaurants/${stored.id}/status`)
+            .then(res => {
+                if (typeof res.data.isOpen === 'boolean') setIsOpen(res.data.isOpen);
             })
             .catch(() => {
                 const val = stored.isOpen;
@@ -62,10 +57,9 @@ export default function RestaurantDashboard() {
 
         // โหลดรีวิวของร้าน
         setLoadingReviews(true);
-        fetch(`http://localhost:5000/api/reviews/restaurant/${stored.id}`)
-            .then(res => res.json())
-            .then(data => {
-                setReviews(Array.isArray(data) ? data : []);
+        axios.get(`/reviews/restaurant/${stored.id}`)
+            .then(res => {
+                setReviews(Array.isArray(res.data) ? res.data : []);
             })
             .catch(err => console.error('โหลดรีวิวไม่สำเร็จ:', err))
             .finally(() => setLoadingReviews(false));
@@ -79,17 +73,9 @@ export default function RestaurantDashboard() {
         setToggling(true);
         setToggleError('');
         try {
-            const res = await fetch(
-                `http://localhost:5000/api/auth/restaurants/${storedUser.id}/toggle`,
-                { method: 'PATCH' }
-            );
-            const data = await res.json();
-            if (!res.ok) {
-                setToggleError(data.message || 'ไม่สามารถเปลี่ยนสถานะได้');
-                return;
-            }
-            setIsOpen(data.isOpen);
-            localStorage.setItem('user', JSON.stringify({ ...storedUser, isOpen: data.isOpen }));
+            const res = await axios.patch(`/auth/restaurants/${storedUser.id}/toggle`);
+            setIsOpen(res.data.isOpen);
+            localStorage.setItem('user', JSON.stringify({ ...storedUser, isOpen: res.data.isOpen }));
         } catch (err) {
             console.error('toggle ไม่สำเร็จ:', err);
             setToggleError('เชื่อมต่อ Server ไม่ได้ กรุณาลองใหม่');

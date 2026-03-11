@@ -3,11 +3,12 @@ const router = express.Router();
 const Review = require('../models/Review');
 const Order = require('../models/Order');
 const User = require('../models/User');
+const { verifyToken } = require('../middleware/auth');
 
 // -----------------------------------------
 // [POST] /api/reviews (สร้างรีวิวสำหรับออเดอร์)
 // -----------------------------------------
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
     try {
         const { orderId, customerId, restaurantId, rating, comment } = req.body;
 

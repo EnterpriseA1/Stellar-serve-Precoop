@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const Item = require('../models/Item');
+const { verifyToken } = require('../middleware/auth');
 
 // -----------------------------------------
 // [POST] /api/items (ร้านค้าเพิ่มเมนูใหม่)
 // -----------------------------------------
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   try {
     const { name, description, price, category, restaurantId, imageUrl } = req.body;
 
@@ -58,7 +59,7 @@ router.get('/restaurant/:id', async (req, res) => {
 // -----------------------------------------
 // [PUT] /api/items/update/:id (แก้ไขข้อมูลเมนู)
 // -----------------------------------------
-router.put('/update/:id', async (req, res) => {
+router.put('/update/:id', verifyToken, async (req, res) => {
   try {
     const { name, description, price, category, imageUrl } = req.body;
 
@@ -83,7 +84,7 @@ router.put('/update/:id', async (req, res) => {
 // -----------------------------------------
 // [DELETE] /api/items/delete/:id (ลบเมนูอาหาร)
 // -----------------------------------------
-router.delete('/delete/:id', async (req, res) => {
+router.delete('/delete/:id', verifyToken, async (req, res) => {
   try {
     const deletedItem = await Item.findByIdAndDelete(req.params.id);
 

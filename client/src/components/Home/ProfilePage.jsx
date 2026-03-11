@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ImagePicker from './ImagePicker';
+import axios from '../../utils/axiosConfig';
 
 export default function ProfilePage({ user, setUser }) {
     const navigate = useNavigate();
@@ -39,16 +40,8 @@ export default function ProfilePage({ user, setUser }) {
         setSaveMsg('');
         setSaveError('');
         try {
-            const res = await fetch(`http://localhost:5000/api/auth/profile/${user.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const data = await res.json();
-            if (!res.ok) {
-                setSaveError(data.message || 'บันทึกไม่สำเร็จ');
-                return;
-            }
+            await axios.patch(`/auth/profile/${user.id}`, payload);
+            
             // อัปเดต localStorage และ state ให้ตรงกับข้อมูลใหม่
             const updatedUser = { ...user, ...payload };
             localStorage.setItem('user', JSON.stringify(updatedUser));
@@ -58,7 +51,7 @@ export default function ProfilePage({ user, setUser }) {
             setSaveMsg('✅ บันทึกสำเร็จแล้ว!');
             setTimeout(() => setSaveMsg(''), 3000);
         } catch (err) {
-            setSaveError('เชื่อมต่อ Server ไม่ได้');
+            setSaveError(err.response?.data?.message || 'เชื่อมต่อ Server ไม่ได้');
         } finally {
             setSaving(false);
         }

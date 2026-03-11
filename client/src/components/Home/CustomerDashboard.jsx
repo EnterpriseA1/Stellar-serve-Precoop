@@ -1,13 +1,13 @@
 import React from 'react';
+import axios from '../../utils/axiosConfig';
 
 function ReviewListModal({ restaurant, onClose }) {
     const [reviews, setReviews] = React.useState([]);
     const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
-        fetch(`http://localhost:5000/api/reviews/restaurant/${restaurant._id}`)
-            .then(res => res.json())
-            .then(data => setReviews(Array.isArray(data) ? data : []))
+        axios.get(`/reviews/restaurant/${restaurant._id}`)
+            .then(res => setReviews(Array.isArray(res.data) ? res.data : []))
             .catch(err => console.error(err))
             .finally(() => setLoading(false));
     }, [restaurant]);
@@ -93,11 +93,10 @@ export default function CustomerDashboard({ addToCart }) {
     // ดึงรายชื่อร้านอาหารจาก API
     React.useEffect(() => {
         setLoadingRestaurants(true);
-        fetch('http://localhost:5000/api/auth/restaurants')
-            .then(res => res.json())
-            .then(data => {
-                setRestaurants(data);
-                if (data.length > 0) {
+        axios.get('/auth/restaurants')
+            .then(res => {
+                setRestaurants(res.data);
+                if (res.data.length > 0) {
                     // สุ่มร้านอาหาร 3-5 ร้านมาโชว์บน Banner
                     const shuffled = [...data].sort(() => 0.5 - Math.random());
                     setSlidingRestaurants(shuffled.slice(0, 5));
@@ -123,9 +122,8 @@ export default function CustomerDashboard({ addToCart }) {
         setLoadingMenu(true);
         setSelectedRestaurant(restaurant);
         try {
-            const res = await fetch(`http://localhost:5000/api/items/restaurant/${restaurant._id}`);
-            const data = await res.json();
-            setMenu(Array.isArray(data) ? data : []);
+            const res = await axios.get(`/items/restaurant/${restaurant._id}`);
+            setMenu(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error('ดึงเมนูไม่สำเร็จ', err);
         } finally {

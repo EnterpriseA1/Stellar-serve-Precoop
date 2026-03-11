@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from '../../utils/axiosConfig';
 
 export default function SearchPage({ onSelectRestaurant }) {
     const [query, setQuery] = React.useState('');
@@ -6,11 +7,9 @@ export default function SearchPage({ onSelectRestaurant }) {
     const [loading, setLoading] = React.useState(false);
     const [searched, setSearched] = React.useState(false);
 
-    // ดึงร้านทั้งหมดมาตอน mount แล้วค่อย filter ฝั่ง client
     React.useEffect(() => {
-        fetch('http://localhost:5000/api/auth/restaurants')
-            .then(res => res.json())
-            .then(data => setRestaurants(Array.isArray(data) ? data : []))
+        axios.get('/auth/restaurants')
+            .then(res => setRestaurants(Array.isArray(res.data) ? res.data : []))
             .catch(err => console.error(err));
     }, []);
 
