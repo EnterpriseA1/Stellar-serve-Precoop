@@ -97,9 +97,9 @@ export default function CustomerDashboard({ addToCart }) {
             .then(res => {
                 setRestaurants(res.data);
                 if (res.data.length > 0) {
-                    // สุ่มร้านอาหาร 3-5 ร้านมาโชว์บน Banner
-                    const shuffled = [...data].sort(() => 0.5 - Math.random());
-                    setSlidingRestaurants(shuffled.slice(0, 5));
+                    // สุ่มร้านอาหารโชว์บน Banner
+                    const shuffled = [...res.data].sort(() => 0.5 - Math.random());
+                    setSlidingRestaurants(shuffled.slice(0, 4));
                 }
             })
             .catch(err => console.error(err))
