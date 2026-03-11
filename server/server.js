@@ -9,6 +9,7 @@ require('dotenv').config();
 
 const app = express();
 
+
 // Middleware พื้นฐาน
 app.use(cors()); // ยอมรับ Request จาก Frontend (React)
 app.use(express.json({ limit: '10mb' })); // เพิ่ม limit สำหรับรูปภาพ Base64
