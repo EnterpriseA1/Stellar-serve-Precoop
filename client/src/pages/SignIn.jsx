@@ -7,6 +7,7 @@ export default function SignIn() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(''); // เอาไว้โชว์ข้อความ Error
+  const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -24,10 +25,12 @@ export default function SignIn() {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('user', JSON.stringify(res.data.user));
 
-      alert('เข้าสู่ระบบสำเร็จ!');
+      setShowSuccess(true);
 
-      // แยกหน้าตาม Role ของ User (MVP: ส่งไปหน้า Home ก่อน)
-      navigate('/home');
+      // หน่วงเวลาให้เห็น Popup 1.5 วินาที แล้วแยกหน้าตาม Role ของ User
+      setTimeout(() => {
+        navigate('/home');
+      }, 1500);
 
     } catch (err) {
       // ถ้า Error ให้ดึงข้อความจาก Backend มาโชว์
@@ -82,6 +85,19 @@ export default function SignIn() {
           </Link>
         </div>
       </div>
+
+      {/* Success Popup */}
+      {showSuccess && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all">
+          <div className="flex flex-col items-center p-8 bg-white shadow-2xl rounded-3xl">
+            <div className="flex items-center justify-center w-20 h-20 mb-4 text-5xl text-green-500 bg-green-100 rounded-full">
+              ✨
+            </div>
+            <h3 className="text-2xl font-bold text-[#1a113d]">เข้าสู่ระบบสำเร็จ!</h3>
+            <p className="mt-2 text-sm text-gray-500 font-medium">กำลังพาท่านเข้าสู่ระบบ...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

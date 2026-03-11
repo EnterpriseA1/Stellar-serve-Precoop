@@ -8,6 +8,7 @@ export default function SignUp() {
         username: '', password: '', name: '', phone: '', role: 'customer', address: '', category: 'other'
     });
     const [error, setError] = useState('');
+    const [showSuccess, setShowSuccess] = useState(false);
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -20,8 +21,10 @@ export default function SignUp() {
 
         try {
             await axios.post('http://localhost:5000/api/auth/register', formData);
-            alert('สมัครสมาชิกสำเร็จ! กรุณาล็อกอิน');
-            navigate('/');
+            setShowSuccess(true);
+            setTimeout(() => {
+                navigate('/');
+            }, 1500);
         } catch (err) {
             setError(err.response?.data?.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก');
         }
@@ -91,6 +94,19 @@ export default function SignUp() {
                     </Link>
                 </div>
             </div>
+
+            {/* Success Popup */}
+            {showSuccess && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm transition-all">
+                    <div className="flex flex-col items-center p-8 bg-white shadow-2xl rounded-3xl">
+                        <div className="flex items-center justify-center w-20 h-20 mb-4 text-5xl text-green-500 bg-green-100 rounded-full">
+                            ✨
+                        </div>
+                        <h3 className="text-2xl font-bold text-[#1a113d]">สมัครสมาชิกสำเร็จ!</h3>
+                        <p className="mt-2 text-sm text-gray-500 font-medium">กรุณาล็อกอินเพื่อเข้าสู่ระบบ...</p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

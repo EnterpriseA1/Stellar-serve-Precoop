@@ -103,9 +103,11 @@ router.get('/restaurants', async (req, res) => {
             { password: 0 } // ไม่ส่งรหัสผ่าน แต่อื่นๆ รวม category ส่งไปหมด
         );
 
-        // ดึงรีวิวทั้งหมดมาคำนวณเรตติ้ง
+        // ดึงรีวิวเฉพาะของร้านที่เปิดอยู่มาคำนวณเรตติ้ง
         const Review = require('../models/Review');
+        const restaurantIds = restaurants.map(r => r._id.toString());
         const ratings = await Review.aggregate([
+            { $match: { restaurantId: { $in: restaurantIds } } },
             { $group: { _id: "$restaurantId", averageRating: { $avg: "$rating" }, reviewCount: { $sum: 1 } } }
         ]);
 
