@@ -5,6 +5,7 @@ const authRoutes = require('./routes/auth');
 const itemRoutes = require('./routes/items');
 const orderRoutes = require('./routes/orders');
 const reviewRoutes = require('./routes/reviews');
+const cartRoutes = require('./routes/cart');
 require('dotenv').config();
 
 const app = express();
@@ -30,6 +31,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/cart', cartRoutes);
 
 
 // สร้าง Route พื้นฐานไว้เทสว่า API ทำงานไหม

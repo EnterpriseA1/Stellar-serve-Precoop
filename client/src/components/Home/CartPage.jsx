@@ -15,12 +15,16 @@ export default function CartPage({ cart, addToCart, removeFromCart, setCurrentTa
         setStep('address');
     };
 
-    const handleConfirmOrder = async () => {
-        if (!user) return;
+    const handleToSummary = () => {
         if (!address.trim()) {
             setOrderError('กรุณากรอกที่อยู่สำหรับจัดส่ง');
             return;
         }
+        setOrderError('');
+        setStep('summary');
+    };
+
+    const handleConfirmOrder = async () => {
 
         // ดึง restaurantId จาก item แรกใน cart
         const firstItem = cart[0];
@@ -97,12 +101,74 @@ export default function CartPage({ cart, addToCart, removeFromCart, setCurrentTa
                 </div>
 
                 <button
+                    onClick={handleToSummary}
+                    className={`w-full py-4 font-bold text-white rounded-2xl shadow-md transition bg-[#1a113d] hover:bg-[#2d1e5e]`}
+                >
+                    ถัดไป (ตรวจสอบรายการ)
+                </button>
+            </div>
+        );
+    }
+
+    if (step === 'summary') {
+        return (
+            <div className="p-6 space-y-4">
+                <div className="flex items-center gap-3 mb-2">
+                    <button onClick={() => setStep('address')} className="inline-flex items-center gap-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-[#1a113d] font-bold text-sm rounded-full transition active:scale-95">
+                        ← กลับ
+                    </button>
+                    <h2 className="text-2xl font-bold text-[#1a113d]">สรุปรายการสั่งซื้อ</h2>
+                </div>
+
+                {/* แสดงที่อยู่จัดส่ง */}
+                <div className="bg-white p-4 rounded-2xl shadow-sm space-y-2">
+                    <h3 className="font-bold text-[#1a113d] text-sm">📍 ที่อยู่จัดส่ง</h3>
+                    <p className="text-sm text-gray-600 bg-gray-50 p-3 rounded-xl border border-gray-100 min-h-[60px] whitespace-pre-wrap">{address}</p>
+                </div>
+
+                {/* แสดงรายการอาหาร */}
+                <div className="bg-white p-4 rounded-2xl shadow-sm space-y-3">
+                    <h3 className="font-bold text-[#1a113d] text-sm flex justify-between">
+                        <span>รายการอาหาร</span>
+                        <span className="text-yellow-600 cursor-pointer hover:underline text-xs" onClick={() => setStep('cart')}>แก้ไขตะกร้า</span>
+                    </h3>
+                    <div className="space-y-2 max-h-[30vh] overflow-y-auto pr-2 custom-scrollbar">
+                        {cart.map((item) => (
+                            <div key={item.id} className="flex justify-between items-start text-sm">
+                                <div className="flex gap-2 w-3/4">
+                                    <span className="font-bold text-[#1a113d] w-6 text-center bg-gray-100 rounded-lg">{item.qty}x</span>
+                                    <span className="text-gray-600 line-clamp-2">{item.name}</span>
+                                </div>
+                                <span className="font-bold text-[#1a113d]">฿ {item.price * item.qty}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* สรุปยอดเงิน */}
+                <div className="p-4 bg-white rounded-2xl shadow-sm space-y-2">
+                    <div className="flex justify-between text-sm text-gray-500"><span>ค่าอาหาร (Subtotal)</span><span>฿ {total}</span></div>
+                    <div className="flex justify-between text-sm text-gray-500"><span>ค่าจัดส่ง (Delivery Fee)</span><span>฿ 30</span></div>
+                    <div className="flex justify-between font-bold text-[#1a113d] border-t pt-2 mt-2">
+                        <span>ยอดชำระสุทธิ (Total)</span>
+                        <span className="text-xl text-yellow-500">฿ {total + 30}</span>
+                    </div>
+                </div>
+                {/* คำเตือนเรื่องการชำระเงิน */}
+                <div className="bg-yellow-50 border border-yellow-200 p-3 rounded-xl text-xs text-yellow-800 text-center font-medium">
+                    ⚠️ <span className="font-bold text-red-600">โปรดทราบ:</span> ชำระเงินด้วย <span className="font-bold underline">เงินสด</span> กับไรเดอร์ของร้านค้าเท่านั้น ณ วันจัดส่ง
+                </div>
+
+                {orderError && <p className="text-sm text-red-500 font-bold text-center">⚠️ {orderError}</p>}
+
+                {/* ปุ่มยืนยัน */}
+                <button
                     onClick={handleConfirmOrder}
                     disabled={ordering}
                     className={`w-full py-4 font-bold text-white rounded-2xl shadow-md transition
-                        ${ordering ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1a113d] hover:bg-[#2d1e5e]'}`}
+                        ${ordering ? 'bg-gray-400 cursor-not-allowed' : 'bg-yellow-400 hover:bg-yellow-500 text-[#1a113d]'}`}
                 >
-                    {ordering ? '⏳ กำลังสั่ง...' : 'Confirm Order'}
+                    {ordering ? '⏳ กำลังส่งคำสั่งซื้อ...' : 'ยืนยันคำสั่งซื้อ (Confirm Order)'}
                 </button>
             </div>
         );
@@ -110,7 +176,7 @@ export default function CartPage({ cart, addToCart, removeFromCart, setCurrentTa
 
     return (
         <div className="p-6 space-y-4">
-            <h2 className="text-2xl font-bold text-[#1a113d]">🛒 Cart</h2>
+            <h2 className="text-2xl font-bold text-[#1a113d]">🛒 ตะกร้าสินค้า</h2>
 
             <div className="space-y-3">
                 {cart.map((item) => (

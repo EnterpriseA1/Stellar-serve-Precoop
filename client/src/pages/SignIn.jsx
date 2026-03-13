@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from '../utils/axiosConfig';
 import logo from '../assets/logo.png';
@@ -9,6 +9,14 @@ export default function SignIn() {
   const [error, setError] = useState(''); // เอาไว้โชว์ข้อความ Error
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // ถ้าเคยล็อกอินไว้แล้ว ให้พาไปหน้าหลักเลย
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      navigate('/home', { replace: true });
+    }
+  }, [navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -29,7 +37,7 @@ export default function SignIn() {
 
       // หน่วงเวลาให้เห็น Popup 1.5 วินาที แล้วแยกหน้าตาม Role ของ User
       setTimeout(() => {
-        navigate('/home');
+        navigate('/home', { replace: true });
       }, 1500);
 
     } catch (err) {

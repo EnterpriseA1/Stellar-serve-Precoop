@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from '../utils/axiosConfig';
 import Navbar from '../components/Navbar';
 import NavbarRestaurant from '../components/NavbarRestaurant';
 
@@ -21,6 +22,20 @@ export default function Home() {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const navigate = useNavigate();
 
+    // ช่วยอัปเดต Cart ไปที่ Backend ทุกครั้งที่มีการเปลี่ยนแปลง
+    const syncCartToDB = async (newCartItems, rId) => {
+        if (!user) return;
+        try {
+            await axios.post('/cart/sync', {
+                customerId: user.id,
+                restaurantId: rId,
+                items: newCartItems
+            });
+        } catch (error) {
+            console.error('Failed to sync cart:', error);
+        }
+    };
+
     // เพิ่มสินค้าลงตะกร้า
     const addToCart = (item) => {
         // เช็คว่ามีสินค้าในตะกร้ากี่ชิ้น และมาจากคนละร้านหรือไม่ (เช็คจาก state cart โดยตรง)
@@ -30,18 +45,23 @@ export default function Home() {
             return; // ยังไม่เพิ่มสินค้าลงในตะกร้า จนกว่าจะยืนยัน
         }
 
-        setCart(prev => {
-            const existing = prev.find(c => c.id === item.id);
-            if (existing) {
-                return prev.map(c => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
-            }
-            return [...prev, { ...item, qty: 1 }];
-        });
+        const existing = cart.find(c => c.id === item.id);
+        let newCart;
+        if (existing) {
+            newCart = cart.map(c => c.id === item.id ? { ...c, qty: c.qty + 1 } : c);
+        } else {
+            newCart = [...cart, { ...item, qty: 1 }];
+        }
+        
+        setCart(newCart);
+        syncCartToDB(newCart, item.restaurantId);
     };
 
     const handleConfirmClearCart = () => {
         if (pendingItem) {
-            setCart([{ ...pendingItem, qty: 1 }]);
+            const newCart = [{ ...pendingItem, qty: 1 }];
+            setCart(newCart);
+            syncCartToDB(newCart, pendingItem.restaurantId);
         }
         setShowConfirmModal(false);
         setPendingItem(null);
@@ -54,11 +74,19 @@ export default function Home() {
 
     // ลดจำนวนหรือลบออกจากตะกร้า
     const removeFromCart = (itemId) => {
-        setCart(prev => {
-            const existing = prev.find(c => c.id === itemId);
-            if (existing?.qty === 1) return prev.filter(c => c.id !== itemId);
-            return prev.map(c => c.id === itemId ? { ...c, qty: c.qty - 1 } : c);
-        });
+        const existing = cart.find(c => c.id === itemId);
+        if (!existing) return;
+        
+        let newCart;
+        if (existing.qty === 1) {
+            newCart = cart.filter(c => c.id !== itemId);
+        } else {
+            newCart = cart.map(c => c.id === itemId ? { ...c, qty: c.qty - 1 } : c);
+        }
+        
+        setCart(newCart);
+        // ถ้าลบจนหมดตะกร้า restaurantId จะเป็น null
+        syncCartToDB(newCart, newCart.length > 0 ? newCart[0].restaurantId : null);
     };
 
     const cartCount = cart.reduce((sum, c) => sum + c.qty, 0);
@@ -69,7 +97,17 @@ export default function Home() {
         if (!storedUser) {
             navigate('/'); // ถ้ายังไม่ล็อกอิน ให้เด้งกลับไปหน้า Sign In
         } else {
-            setUser(JSON.parse(storedUser));
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+            
+            // โหลดข้อมูลตะกร้าของ User จาก Database เฉพาะตอนโหลดหน้าครั้งแรก
+            axios.get(`/cart/${parsedUser.id}`)
+                .then(res => {
+                    if (res.data && res.data.items) {
+                        setCart(res.data.items);
+                    }
+                })
+                .catch(err => console.error('Failed to load cart from DB:', err));
         }
     }, [navigate]);
 
@@ -99,7 +137,7 @@ export default function Home() {
                     </>
                 )}
 
-                {currentTab === 'cart' && <CartPage cart={cart} addToCart={addToCart} removeFromCart={removeFromCart} setCurrentTab={setCurrentTab} clearCart={() => setCart([])} user={user} />}
+                {currentTab === 'cart' && <CartPage cart={cart} addToCart={addToCart} removeFromCart={removeFromCart} setCurrentTab={setCurrentTab} clearCart={() => { setCart([]); syncCartToDB([], null); }} user={user} />}
 
                 {currentTab === 'search' && <SearchPage onSelectRestaurant={(restaurant) => { setCurrentTab('home'); }} />}
                 {currentTab === 'orders' && (

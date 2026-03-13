@@ -106,7 +106,7 @@ router.get('/restaurants', async (req, res) => {
 
         // ดึงรีวิวเฉพาะของร้านที่เปิดอยู่มาคำนวณเรตติ้ง
         const Review = require('../models/Review');
-        const restaurantIds = restaurants.map(r => r._id.toString());
+        const restaurantIds = restaurants.map(r => r._id);
         const ratings = await Review.aggregate([
             { $match: { restaurantId: { $in: restaurantIds } } },
             { $group: { _id: "$restaurantId", averageRating: { $avg: "$rating" }, reviewCount: { $sum: 1 } } }
