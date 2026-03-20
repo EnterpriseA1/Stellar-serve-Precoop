@@ -28,14 +28,18 @@
 
 ```mermaid
 graph TD
-    A([👨‍💻 User]) -->|ใช้งานบนเบราว์เซอร์| B(💻 Frontend: React + Vite <br> Port: 5173)
-    B -->|ส่ง HTTP Requests ผ่าน Axios| C(⚙️ Backend: Express.js API <br> Port: 5000)
-    C -->|อ่าน/เขียนข้อมูลด้วย Mongoose| D[(🗄️ Database: MongoDB)]
-    D -->|ส่งคืนผลลัพธ์| C
-    C -->|ส่ง JSON Response กลับ| B
-    B -->|อัปเดตหน้าจอ| A
-(ระบบรัน Frontend ที่พอร์ต http://localhost:5173 และ API Backend ที่พอร์ต 5000 โดยมีการตั้งค่า CORS เพื่อให้ Frontend สามารถส่ง Request มาได้)
+    User["👨‍💻 User"]
+    Frontend["💻 Frontend: React + Vite (Port: 5173)"]
+    Backend["⚙️ Backend: Express API (Port: 5000)"]
+    Database[("🗄️ Database: MongoDB")]
 
+    User -->|"ใช้งานบนเบราว์เซอร์"| Frontend
+    Frontend -->|"ส่ง HTTP Request (Axios)"| Backend
+    Backend -->|"อ่าน/เขียนข้อมูล"| Database
+    Database -->|"ส่งคืนผลลัพธ์"| Backend
+    Backend -->|"ส่ง JSON Response"| Frontend
+    Frontend -->|"อัปเดตหน้าจอ"| User
+```
 📂 Project Structure
 /client - โค้ดส่วน Frontend (React + Vite) หน้าหลักประกอบด้วยหน้า Login, Signup และ Home
 
