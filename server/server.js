@@ -13,7 +13,11 @@ const app = express();
 
 // Middleware พื้นฐาน
 app.use(cors({
-    origin: ['http://localhost:5173', 'http://127.0.0.1:5173'], // ใส่ origin ของ Frontend
+    origin: [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'https://stellar-serve-precoop.vercel.app'
+    ],
     credentials: true, // อนุญาตให้ส่ง Cookie หรือ Header Authorization
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
@@ -39,8 +43,12 @@ app.get('/', (req, res) => {
     res.send('🚀 StellarServe API is running!');
 });
 
-// กำหนด Port และสั่ง Start Server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`🚀 Server วิ่งอยู่ที่ Port: ${PORT}`);
-});
+// กำหนด Port และสั่ง Start Server (รันเฉพาะตอน dev — Vercel จะ import app โดยตรง)
+if (require.main === module) {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+        console.log(`🚀 Server วิ่งอยู่ที่ Port: ${PORT}`);
+    });
+}
+
+module.exports = app;
