@@ -5,8 +5,9 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { verifyToken } = require('../middleware/auth');
 
-// JWT Secret Key (เอาไว้เข้ารหัส Token - ปกติควรเอาไปไว้ในไฟล์ .env)
-const JWT_SECRET = process.env.JWT_SECRET || 'stellarserve_super_secret_key';
+// JWT Secret Key (ดึงจาก .env เท่านั้น — ห้าม hardcode)
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) throw new Error('JWT_SECRET is not set in environment variables');
 
 // -----------------------------------------
 // [POST] /api/auth/register (สมัครสมาชิก)
