@@ -18,8 +18,8 @@ export default function ProfilePage({ user, setUser }) {
     const [saveError, setSaveError] = React.useState('');
 
     const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('token');
+        sessionStorage.removeItem('user');
         navigate('/');
     };
 
@@ -44,7 +44,7 @@ export default function ProfilePage({ user, setUser }) {
             
             // อัปเดต localStorage และ state ให้ตรงกับข้อมูลใหม่
             const updatedUser = { ...user, ...payload };
-            localStorage.setItem('user', JSON.stringify(updatedUser));
+            sessionStorage.setItem('user', JSON.stringify(updatedUser));
             if (setUser) setUser(updatedUser);
             // อัปเดต formData ให้แสดงค่าล่าสุด
             setFormData(payload);
