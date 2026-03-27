@@ -93,7 +93,7 @@ export default function Home() {
 
     useEffect(() => {
         // เช็คว่ามีข้อมูล User ในเครื่องไหม (ล็อกอินหรือยัง)
-        const storedUser = sessionStorage.getItem('user');
+        const storedUser = localStorage.getItem('user');
         if (!storedUser) {
             navigate('/'); // ถ้ายังไม่ล็อกอิน ให้เด้งกลับไปหน้า Sign In
         } else {

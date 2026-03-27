@@ -11,7 +11,7 @@ export default function RestaurantDashboard() {
     const [reviews, setReviews] = React.useState([]);
     const [loadingReviews, setLoadingReviews] = React.useState(true);
 
-    const storedUser = JSON.parse(sessionStorage.getItem('user'));
+    const storedUser = JSON.parse(localStorage.getItem('user'));
 
     const fetchOrders = () => {
         if (!storedUser?.id) return;
@@ -41,7 +41,7 @@ export default function RestaurantDashboard() {
 
     // โหลดสถานะจาก API ตรงๆ
     React.useEffect(() => {
-        const stored = JSON.parse(sessionStorage.getItem('user'));
+        const stored = JSON.parse(localStorage.getItem('user'));
         if (!stored) return;
 
         axios.get(`/auth/restaurants/${stored.id}/status`)
@@ -68,14 +68,14 @@ export default function RestaurantDashboard() {
     }, []);
 
     const handleToggle = async () => {
-        const storedUser = JSON.parse(sessionStorage.getItem('user'));
+        const storedUser = JSON.parse(localStorage.getItem('user'));
         if (!storedUser) return;
         setToggling(true);
         setToggleError('');
         try {
             const res = await axios.patch(`/auth/restaurants/${storedUser.id}/toggle`);
             setIsOpen(res.data.isOpen);
-            sessionStorage.setItem('user', JSON.stringify({ ...storedUser, isOpen: res.data.isOpen }));
+            localStorage.setItem('user', JSON.stringify({ ...storedUser, isOpen: res.data.isOpen }));
         } catch (err) {
             console.error('toggle ไม่สำเร็จ:', err);
             setToggleError('เชื่อมต่อ Server ไม่ได้ กรุณาลองใหม่');

@@ -12,7 +12,7 @@ export default function SignIn() {
 
   useEffect(() => {
     // ถ้าเคยล็อกอินไว้แล้ว ให้พาไปหน้าหลักเลย
-    const storedUser = sessionStorage.getItem('user');
+    const storedUser = localStorage.getItem('user');
     if (storedUser) {
       navigate('/home', { replace: true });
     }
@@ -30,8 +30,8 @@ export default function SignIn() {
       });
 
       // ถ้าสำเร็จ เก็บ Token และข้อมูล User ลงเครื่อง
-      sessionStorage.setItem('token', res.data.token);
-      sessionStorage.setItem('user', JSON.stringify(res.data.user));
+      localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data.user));
 
       setShowSuccess(true);
 
