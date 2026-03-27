@@ -13,12 +13,19 @@ const app = express();
 
 // Middleware พื้นฐาน
 app.use(cors({
-    origin: [
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-        'https://stellar-serve-precoop.vercel.app'
-    ],
-    credentials: true, // อนุญาตให้ส่ง Cookie หรือ Header Authorization
+    origin: (origin, callback) => {
+        const allowedOrigins = [
+            'http://localhost:5173',
+            'http://127.0.0.1:5173',
+        ];
+        // อนุญาต Vercel URL ทุก subdomain (ทั้ง production และ preview)
+        if (!origin || allowedOrigins.includes(origin) || /\.vercel\.app$/.test(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
 }));
